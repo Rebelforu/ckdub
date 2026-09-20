@@ -177,7 +177,10 @@ export async function submitRequest(formData: FormData) {
 
   const { error } = await supabase
     .from('requests')
-    .insert([{ drama_name, language, dub_requested }]);
+    .insert([{ 
+      drama_title: drama_name, 
+      language_requested: `${language} - ${dub_requested}` 
+    }]);
 
   if (error) throw new Error('Failed to submit request');
   

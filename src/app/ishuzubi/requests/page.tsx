@@ -1,4 +1,4 @@
-import { getServiceSupabase } from '@/lib/supabase';
+﻿import { getServiceSupabase } from '@/lib/supabase';
 import AdminAuth from '../AdminAuth';
 import { updateRequestStatus } from '@/app/actions';
 import { timeAgo } from '@/lib/utils';
@@ -56,10 +56,10 @@ export default async function AdminRequestsPage() {
                   {requests.map((req) => (
                     <tr key={req.id} className="hover:bg-white/[0.02]">
                       <td className="px-6 py-4">
-                        <div className="font-medium text-white">{req.drama_name}</div>
+                        <div className="font-medium text-white">{req.drama_title}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-[#92949A]">{req.language}</span>
+                        <span className="text-[#92949A]">{req.language_requested}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 rounded text-xs font-medium bg-[#1C1D22] text-[#92949A]">

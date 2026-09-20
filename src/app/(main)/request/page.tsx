@@ -1,14 +1,8 @@
-import { getServiceSupabase } from "@/lib/supabase";
 import { submitRequest } from "@/app/actions";
 
 export const revalidate = 3600;
 
 export default async function RequestDrama() {
-  const supabase = getServiceSupabase();
-  const { data: requests } = await supabase
-    .from('requests')
-    .select('*')
-    .order('upvotes', { ascending: false });
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl pt-32">
