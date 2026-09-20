@@ -175,15 +175,11 @@ export default async function DramaDetail({ params }: { params: { slug: string }
         {/* Right Column: Ads & Series Info */}
         <div className="w-full lg:w-96 shrink-0 space-y-6">
           
-          {/* Side Ad Placeholder */}
-          <div className="w-full h-[250px] bg-[#141519] rounded-2xl border border-white/5 flex items-center justify-center overflow-hidden">
-             <div className="text-center">
-                <span className="text-[#92949A] text-xs font-semibold tracking-widest uppercase mb-2 block">Advertisement</span>
-                {/* 
-                  Drop your Adsterra 300x250 Banner Code here.
-                  Example: <script type="text/javascript" src="//plXXXXX.com/xxxx.js"></script>
-                */}
-             </div>
+          {/* Adsterra Native Banner */}
+          <div className="w-full bg-[#141519] rounded-2xl border border-white/5 flex flex-col items-center justify-center overflow-hidden p-4">
+            <span className="text-[#92949A] text-[10px] uppercase tracking-[0.2em] font-bold mb-3">Sponsored</span>
+            <script async data-cfasync="false" src="https://pl31384983.profitableratecpmnetwork.com/4de4d6df87525034f24c86c4bc7babff/invoke.js"></script>
+            <div id="container-4de4d6df87525034f24c86c4bc7babff"></div>
           </div>
 
           {/* AI / Entity SEO Fact Block - Moved here */}
