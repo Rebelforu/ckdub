@@ -266,7 +266,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
               <ClientEpisodeButton
                 key={ep.id || ep.episode_number}
                 episodeNumber={ep.episode_number}
-                videoUrl={ep.video_url}
+                videoUrl={ep.terabox_url}
               />
             ))}
           </div>
