@@ -22,6 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Overview", path: "/ishuzubi", icon: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },
     { name: "Manage Dramas", path: "/ishuzubi/dramas", icon: "M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" },
     { name: "Requests", path: "/ishuzubi/requests", icon: "M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z" },
+    { name: "Feedback", path: "/ishuzubi/comments", icon: "M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" },
     { name: "Analytics", path: "/ishuzubi/analytics", icon: "M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" }
   ];
 

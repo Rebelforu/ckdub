@@ -320,3 +320,41 @@ export async function updateDrama(formData: FormData) {
   revalidatePath(`/drama/${slug}`);
 }
 
+export async function submitComment(formData: FormData) {
+  const supabase = createClient();
+  const drama_slug = formData.get('drama_slug') as string;
+  const user_name = formData.get('user_name') as string || 'Anonymous';
+  const message = formData.get('message') as string;
+
+  if (!message) throw new Error('Message is required');
+
+  const { error } = await supabase
+    .from('comments')
+    .insert([{ drama_slug, user_name, message }]);
+
+  if (error) throw new Error('Failed to submit comment');
+}
+
+export async function updateCommentStatus(formData: FormData) {
+  const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user || user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) throw new Error('Unauthorized');
+
+  const comment_id = formData.get('comment_id') as string;
+  const status = formData.get('status') as string;
+
+  const { error } = await supabase.from('comments').update({ status }).eq('id', comment_id);
+  if (error) throw new Error('Failed to update comment');
+  revalidatePath('/ishuzubi/comments');
+}
+
+export async function deleteComment(formData: FormData) {
+  const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user || user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) throw new Error('Unauthorized');
+
+  const comment_id = formData.get('comment_id') as string;
+  const { error } = await supabase.from('comments').delete().eq('id', comment_id);
+  if (error) throw new Error('Failed to delete comment');
+  revalidatePath('/ishuzubi/comments');
+}

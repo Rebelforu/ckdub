@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import ViewTracker from '@/components/ViewTracker';
 import { redis } from '@/lib/redis';
+import CommentForm from '@/components/CommentForm';
 
 export const revalidate = 3600;
 
@@ -317,6 +318,11 @@ export default async function DramaDetail({ params }: { params: { slug: string }
           </a>
         </section>
       )}
+
+      {/* Private Admin Feedback Form */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <CommentForm dramaSlug={params.slug} />
+      </section>
     </main>
   );
 }
