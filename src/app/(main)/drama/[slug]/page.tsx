@@ -174,17 +174,6 @@ export default async function DramaDetail({ params }: { params: { slug: string }
 
         {/* Right Column: Ads & Series Info */}
         <div className="w-full lg:w-96 shrink-0 space-y-6">
-          
-          {/* Side Ad Placeholder */}
-          <div className="w-full h-[250px] bg-[#141519] rounded-2xl border border-white/5 flex flex-col items-center justify-center overflow-hidden p-4 relative group">
-            <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,255,255,0.015)_10px,rgba(255,255,255,0.015)_20px)]" />
-            <div className="text-center relative z-10">
-              <span className="text-[#92949A] text-[9px] uppercase tracking-[0.2em] font-bold bg-background/80 px-2.5 py-1 rounded backdrop-blur-sm border border-white/5 mb-2 inline-block">
-                Advertisement
-              </span>
-              <p className="text-white/20 text-[10px] mt-2 group-hover:text-white/40 transition-colors">Your Ad Here</p>
-            </div>
-          </div>
 
           {/* AI / Entity SEO Fact Block - Moved here */}
           <div className="text-sm text-[#92949A] bg-[#141519] p-6 rounded-2xl border border-white/5 shadow-lg">
