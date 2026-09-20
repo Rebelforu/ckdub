@@ -178,8 +178,8 @@ export default async function DramaDetail({ params }: { params: { slug: string }
           {/* Adsterra Native Banner */}
           <div className="w-full bg-[#141519] rounded-2xl border border-white/5 flex flex-col items-center justify-center overflow-hidden p-4">
             <span className="text-[#92949A] text-[10px] uppercase tracking-[0.2em] font-bold mb-3">Sponsored</span>
-            <script async data-cfasync="false" src="https://pl31384983.profitableratecpmnetwork.com/4de4d6df87525034f24c86c4bc7babff/invoke.js"></script>
-            <div id="container-4de4d6df87525034f24c86c4bc7babff"></div>
+            <script async data-cfasync="false" src="https://pl31425887.profitableratecpmnetwork.com/1f011103bbe80a84eed5697c5b0b3f2d/invoke.js"></script>
+            <div id="container-1f011103bbe80a84eed5697c5b0b3f2d"></div>
           </div>
 
           {/* AI / Entity SEO Fact Block - Moved here */}

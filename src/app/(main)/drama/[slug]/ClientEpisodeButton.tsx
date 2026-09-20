@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 export default function ClientEpisodeButton({ 
   episodeNumber, 
   videoUrl, 
-  adUrl = "https://www.profitableratecpmnetwork.com/rdtb4gi5j4?key=7d7d50d1c80fa3c1ae977b7062424ddb"
+  adUrl = "https://www.profitableratecpmnetwork.com/wju2nkpt4y?key=9b62f55fb9c420d26ecaca0b8aa97419"
 }: { 
   episodeNumber: number; 
   videoUrl: string;
