@@ -55,6 +55,13 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
+        {/* Monetag Push Notifications */}
+        <Script
+          src="https://5gvci.com/act/files/tag.min.js?z=11844932"
+          data-cfasync="false"
+          strategy="afterInteractive"
+        />
+
         {/* Adsterra Social Bar */}
         <Script
           strategy="afterInteractive"
