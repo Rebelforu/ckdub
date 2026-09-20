@@ -62,6 +62,15 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
+        {/* Monetag In-Page Push Banner */}
+        <Script
+          id="monetag-in-page"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(s){s.dataset.zone='11844940',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
+          }}
+        />
+
         {/* Adsterra Social Bar */}
         <Script
           strategy="afterInteractive"
