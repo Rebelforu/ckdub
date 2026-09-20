@@ -1,13 +1,41 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "CKDub - Asian Drama Streaming",
-  description: "Hindi/English dubbed C-Dramas and K-Dramas",
+  metadataBase: new URL('https://ckdub.com'),
+  title: {
+    default: "CKDub — Stream Korean, Chinese & Asian Dramas Dubbed in Hindi & English",
+    template: "%s | CKDub",
+  },
+  description: "Watch the best Korean Dramas, Chinese Dramas, and Thai series dubbed in high-quality Hindi and English audio. Free streaming, updated daily.",
+  keywords: ["Korean Drama Hindi Dubbed", "K-Drama Hindi", "C-Drama Hindi", "Asian Drama Dubbed", "Watch Korean Drama Online", "CKDub", "Hindi Dubbed Drama", "Korean Series Hindi"],
+  openGraph: {
+    type: "website",
+    siteName: "CKDub",
+    title: "CKDub — The Ultimate Asian Drama Streaming Experience",
+    description: "Stream premium Korean, Chinese, and Thai series dubbed in Hindi and English. Updated daily with new episodes.",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CKDub — Stream Asian Dramas Dubbed in Hindi & English",
+    description: "Your premium destination for dubbed Asian dramas.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {},
 };
 
 export default function RootLayout({
@@ -17,26 +45,78 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans bg-background text-textMain min-h-screen flex flex-col`}>
-        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-surface">
-          <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-primary">
-              CKDub
-            </Link>
-            <nav className="flex space-x-6">
-              <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-              <Link href="/request" className="hover:text-primary transition-colors">Request Drama</Link>
-            </nav>
-          </div>
-        </header>
-        <main className="flex-1">
-          {children}
-        </main>
-        <footer className="bg-surface py-8 mt-12 border-t border-surface">
-          <div className="container mx-auto px-4 text-center text-textMuted">
-            <p>&copy; {new Date().getFullYear()} CKDub. All rights reserved.</p>
-          </div>
-        </footer>
+      <head>
+        {/* JSON-LD Organization Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "CKDub",
+              "url": "https://ckdub.com",
+              "description": "Stream premium Korean, Chinese, and Thai series dubbed in Hindi and English.",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://ckdub.com/browse?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+      </head>
+      <body className={`${inter.variable} font-sans bg-background text-textMain min-h-screen antialiased selection:bg-primary/30 selection:text-white`}>
+        
+        {/* Screen Recording Deterrent Watermark */}
+        <div className="watermark-overlay" aria-hidden="true" />
+        
+        {children}
+
+        {/* === PRODUCTION SECURITY SCRIPTS === */}
+        
+        {/* Console Suppression */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                if(location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'){
+                  var n=function(){};
+                  window.console.log=n;
+                  window.console.warn=n;
+                  window.console.info=n;
+                  window.console.debug=n;
+                  window.console.table=n;
+                  window.console.dir=n;
+                  window.console.dirxml=n;
+                  window.console.group=n;
+                  window.console.groupEnd=n;
+                  window.console.time=n;
+                  window.console.timeEnd=n;
+                  window.console.trace=n;
+                  window.console.count=n;
+                }
+              })();
+            `
+          }}
+        />
+
+        {/* Right-Click & Key Shortcut Disable */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                if(location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+                document.addEventListener('contextmenu',function(e){e.preventDefault();});
+                document.addEventListener('keydown',function(e){
+                  if(e.key==='F12') e.preventDefault();
+                  if(e.ctrlKey && e.shiftKey && (e.key==='I'||e.key==='J'||e.key==='C')) e.preventDefault();
+                  if(e.ctrlKey && e.key==='u') e.preventDefault();
+                  if(e.ctrlKey && e.key==='s') e.preventDefault();
+                });
+              })();
+            `
+          }}
+        />
       </body>
     </html>
   );
