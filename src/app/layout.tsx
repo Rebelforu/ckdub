@@ -55,12 +55,6 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
-        {/* Adsterra Popunder */}
-        <Script
-          strategy="afterInteractive"
-          src="https://pl31425886.profitableratecpmnetwork.com/58/13/7e/58137ee1636af1166a59b9b893b4edb8.js"
-        />
-
         {/* Adsterra Social Bar */}
         <Script
           strategy="afterInteractive"
