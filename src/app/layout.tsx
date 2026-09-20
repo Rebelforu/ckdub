@@ -62,6 +62,15 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
+        {/* Monetag Onclick Popunder */}
+        <Script
+          id="monetag-popunder"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(s){s.dataset.zone='11844948',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
+          }}
+        />
+
         {/* Monetag In-Page Push Banner */}
         <Script
           id="monetag-in-page"

@@ -175,11 +175,15 @@ export default async function DramaDetail({ params }: { params: { slug: string }
         {/* Right Column: Ads & Series Info */}
         <div className="w-full lg:w-96 shrink-0 space-y-6">
           
-          {/* Adsterra Native Banner */}
-          <div className="w-full bg-[#141519] rounded-2xl border border-white/5 flex flex-col items-center justify-center overflow-hidden p-4">
-            <span className="text-[#92949A] text-[10px] uppercase tracking-[0.2em] font-bold mb-3">Sponsored</span>
-            <script async data-cfasync="false" src="https://pl31425887.profitableratecpmnetwork.com/1f011103bbe80a84eed5697c5b0b3f2d/invoke.js"></script>
-            <div id="container-1f011103bbe80a84eed5697c5b0b3f2d"></div>
+          {/* Side Ad Placeholder */}
+          <div className="w-full h-[250px] bg-[#141519] rounded-2xl border border-white/5 flex flex-col items-center justify-center overflow-hidden p-4 relative group">
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,255,255,0.015)_10px,rgba(255,255,255,0.015)_20px)]" />
+            <div className="text-center relative z-10">
+              <span className="text-[#92949A] text-[9px] uppercase tracking-[0.2em] font-bold bg-background/80 px-2.5 py-1 rounded backdrop-blur-sm border border-white/5 mb-2 inline-block">
+                Advertisement
+              </span>
+              <p className="text-white/20 text-[10px] mt-2 group-hover:text-white/40 transition-colors">Your Ad Here</p>
+            </div>
           </div>
 
           {/* AI / Entity SEO Fact Block - Moved here */}
