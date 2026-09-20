@@ -78,7 +78,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
   };
 
   return (
-    <main className="min-h-screen bg-[#0D0E10] text-white">
+    <main className="min-h-screen bg-[#0D0E10] text-white pt-28">
       <ViewTracker slug={params.slug} />
       {/* Schema.org JSON-LD */}
       <script
@@ -266,7 +266,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
               <ClientEpisodeButton
                 key={ep.id || ep.episode_number}
                 episodeNumber={ep.episode_number}
-                slug={params.slug}
+                videoUrl={ep.video_url}
               />
             ))}
           </div>

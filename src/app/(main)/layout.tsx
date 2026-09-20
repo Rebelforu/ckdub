@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AdBlockDetector from "@/components/AdBlockDetector";
+import SearchBar from "@/components/SearchBar";
 
 export default function MainLayout({
   children,
@@ -42,11 +43,7 @@ export default function MainLayout({
 
           {/* Actions */}
           <div className="flex items-center gap-3">
-            <button className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all border border-white/5">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
-            </button>
+            <SearchBar />
             <Link href="/request" className="hidden sm:flex items-center gap-2 text-[13px] font-bold text-white bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-full transition-all border border-white/10 shadow-lg">
               Request
             </Link>

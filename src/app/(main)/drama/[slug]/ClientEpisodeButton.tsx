@@ -1,18 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export default function ClientEpisodeButton({ 
   episodeNumber, 
-  slug, 
+  videoUrl, 
   adUrl = "https://www.profitableratecpmnetwork.com/rdtb4gi5j4?key=7d7d50d1c80fa3c1ae977b7062424ddb"
 }: { 
   episodeNumber: number; 
-  slug: string;
+  videoUrl: string;
   adUrl?: string;
 }) {
-  const router = useRouter();
   const [hasClickedAd, setHasClickedAd] = useState(false);
 
   // Check on mount if user has already triggered the smartlink anywhere this session
@@ -30,13 +28,9 @@ export default function ClientEpisodeButton({
       window.open(adUrl, '_blank');
       setHasClickedAd(true);
       sessionStorage.setItem('ckdub_smartlink_triggered', 'true');
-      
-      // We can also immediately navigate to the video for a smoother experience
-      // or we can just make them click again. Let's make them click again to be safe
-      // as popunders sometimes block the original window if navigating immediately.
     } else {
-      // Already clicked an ad this session: Navigate normally
-      router.push(`/drama/${slug}/watch/${episodeNumber}`);
+      // Already clicked an ad this session: Navigate directly to TeraBox url
+      window.location.href = videoUrl || '#';
     }
   };
 
