@@ -171,7 +171,7 @@ export default async function Home() {
                       </div>
                     </div>
                     <h3 className="font-medium text-textMain text-sm line-clamp-1">{drama.title}</h3>
-                    <p className="text-textMuted text-[11px] mt-0.5">{new Date(drama.created_at).getFullYear()} • {drama.epCount} Season</p>
+                    <p className="text-textMuted text-[11px] mt-0.5">{new Date(drama.created_at).getFullYear()} • {drama.status || 'Drama'}</p>
                   </Link>
                 ))}
               </div>
