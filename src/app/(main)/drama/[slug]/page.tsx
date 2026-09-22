@@ -149,13 +149,15 @@ export default async function DramaDetail({ params }: { params: { slug: string }
 
             {/* Action Buttons */}
             <div className="flex items-center gap-4">
-              <Link
-                href={`/drama/${params.slug}/watch/1`}
-                className="bg-white text-black px-8 py-3.5 rounded-full font-bold text-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+              <a
+                href="#episodes"
+                className="bg-primary text-white px-8 py-3.5 rounded-full font-bold text-lg hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-lg shadow-primary/30"
               >
-                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                Play Ep 1
-              </Link>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+                View Episodes
+              </a>
             </div>
           </div>
         </div>
@@ -233,7 +235,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
       </section>
 
       {/* Episodes Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <section id="episodes" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-24">
         <div className="flex justify-between items-end mb-8 border-b border-white/10 pb-4">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl md:text-3xl font-bold">Episodes</h2>

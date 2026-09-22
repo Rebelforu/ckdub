@@ -13,10 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
   }, []);
 
-  // Only show the admin sidebar if logged in (the AdminAuth component handles the actual lock)
-  if (!session || session.user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
-    return <>{children}</>;
-  }
+  // We let AdminAuth handle the actual protection. The layout can just always render the sidebar.
 
   const menuItems = [
     { name: "Overview", path: "/ishuzubi", icon: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" },

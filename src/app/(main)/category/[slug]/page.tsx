@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import Link from 'next/link';
 import { getServiceSupabase } from '@/lib/supabase';
 import { Metadata } from 'next';
@@ -37,19 +37,19 @@ export default async function CategoryPage({ params }: Props) {
         </div>
 
         {dramas && dramas.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {dramas.map((drama) => {
               const episodesCount = drama.episodes?.[0]?.count || 0;
               return (
                 <Link key={drama.id} href={`/drama/${drama.slug}`} className="group relative block transition-transform duration-300 hover:scale-105">
-                  <div className="aspect-[2/3] relative rounded-lg overflow-hidden bg-[#141519]">
-                    {drama.cover_image_url ? (
+                  <div className="aspect-video relative rounded-lg overflow-hidden bg-[#141519] border border-white/5 group-hover:border-white/20">
+                    {drama.backdrop_url || drama.cover_image_url ? (
                       <Image
-                        src={drama.cover_image_url}
+                        src={drama.backdrop_url || drama.cover_image_url}
                         alt={drama.title}
                         fill
                         className="object-cover"
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[#92949A]">
@@ -62,13 +62,13 @@ export default async function CategoryPage({ params }: Props) {
                         Ongoing
                       </div>
                     )}
-                  </div>
-                  <div className="mt-3">
-                    <h3 className="font-semibold text-sm md:text-base line-clamp-1 group-hover:text-[#E50914] transition-colors">{drama.title}</h3>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-[#92949A]">
-                      <span>{drama.release_year}</span>
-                      <span className="w-1 h-1 rounded-full bg-[#92949A]" />
-                      <span>{episodesCount} Episodes</span>
+                    {/* Always show bottom title on horizontal cards for better UX */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black via-black/80 to-transparent">
+                      <h3 className="font-bold text-white line-clamp-1">{drama.title}</h3>
+                      <div className="text-xs text-gray-300 mt-1 flex items-center justify-between">
+                        <span>{drama.release_year || new Date(drama.created_at).getFullYear()}</span>
+                        <span>{episodesCount} Episodes</span>
+                      </div>
                     </div>
                   </div>
                 </Link>

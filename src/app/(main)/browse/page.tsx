@@ -43,35 +43,39 @@ export default async function BrowsePage() {
             <p className="text-xl">No dramas available yet. Check back soon!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {dramas.map((drama) => {
               const episodeCount = drama.episodes?.length || 0;
               return (
-                <Link key={drama.id} href={`/drama/${drama.slug}`} className="group relative">
-                  <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-surface transition-transform duration-300 group-hover:scale-105 group-hover:shadow-[0_0_15px_rgba(229,9,20,0.3)]">
-                    {drama.poster_url ? (
-                      <Image
-                        src={drama.poster_url}
-                        alt={drama.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-textMuted">
-                        No Image
+                  <Link key={drama.id} href={`/drama/${drama.slug}`} className="group relative block transition-transform duration-300 hover:scale-105">
+                    <div className="aspect-video relative rounded-lg overflow-hidden bg-[#141519] border border-white/5 group-hover:border-white/20">
+                      {drama.backdrop_url || drama.poster_url ? (
+                        <Image
+                          src={drama.backdrop_url || drama.poster_url}
+                          alt={drama.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#92949A]">
+                          No Image
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute top-2 right-2 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase">
+                        {episodeCount} {episodeCount === 1 ? 'EP' : 'EPs'}
                       </div>
-                    )}
-                    <div className="absolute top-2 right-2 bg-primary text-white text-xs font-bold px-2 py-1 rounded shadow-md">
-                      {episodeCount} {episodeCount === 1 ? 'EP' : 'EPs'}
+                      {/* Always show bottom title on horizontal cards for better UX */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black via-black/80 to-transparent">
+                        <h3 className="font-bold text-white line-clamp-1">{drama.title}</h3>
+                        <div className="text-xs text-gray-300 mt-1 flex items-center justify-between">
+                          <span>{drama.release_year || new Date(drama.created_at).getFullYear()}</span>
+                          <span>{drama.status}</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-3">
-                    <h3 className="text-sm font-medium text-textMain group-hover:text-primary transition-colors line-clamp-2">
-                      {drama.title}
-                    </h3>
-                  </div>
-                </Link>
+                  </Link>
               );
             })}
           </div>
