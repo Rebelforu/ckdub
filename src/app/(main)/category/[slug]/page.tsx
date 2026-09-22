@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { getServiceSupabase } from '@/lib/supabase';
 import { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 type Props = {
   params: { slug: string };
