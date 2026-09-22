@@ -1,4 +1,4 @@
-﻿import Image from 'next/image';
+import Image from 'next/image';
 import Link from 'next/link';
 import { getServiceSupabase } from '@/lib/supabase';
 import { Metadata } from 'next';
@@ -43,9 +43,9 @@ export default async function CategoryPage({ params }: Props) {
               return (
                 <Link key={drama.id} href={`/drama/${drama.slug}`} className="group relative block transition-transform duration-300 hover:scale-105">
                   <div className="aspect-video relative rounded-lg overflow-hidden bg-[#141519] border border-white/5 group-hover:border-white/20">
-                    {drama.backdrop_url || drama.cover_image_url ? (
+                    {drama.backdrop_url || drama.poster_url ? (
                       <Image
-                        src={drama.backdrop_url || drama.cover_image_url}
+                        src={drama.backdrop_url || drama.poster_url}
                         alt={drama.title}
                         fill
                         className="object-cover"
