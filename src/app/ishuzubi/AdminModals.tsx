@@ -213,8 +213,8 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
       {/* Episode Modal */}
       {activeModal === 'episode' && mounted && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md flex flex-col shadow-2xl animate-fade-in">
-            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#0a0a0a]">
+          <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl animate-fade-in">
+            <div className="p-6 border-b border-white/5 flex justify-between items-center bg-[#0a0a0a] shrink-0">
               <h2 className="text-lg font-bold text-white">Add New Episode</h2>
               <button onClick={() => setActiveModal('none')} className="text-textMuted hover:text-white p-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
@@ -230,7 +230,7 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
                   showToast(error.message || "An error occurred while publishing the episode.", "error");
                 }
               });
-            }} className="p-6 space-y-5">
+            }} className="p-6 space-y-5 overflow-y-auto">
               
               <div>
                 <label className="block text-xs font-semibold text-textMuted mb-2 uppercase tracking-wider">Select Series</label>
