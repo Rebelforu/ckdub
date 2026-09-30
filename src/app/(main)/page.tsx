@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Image from "next/image";
 import { timeAgo } from "@/lib/utils";
 import { getServiceSupabase } from "@/lib/supabase";
@@ -40,15 +40,6 @@ export default async function Home() {
         epCount: d.episodes?.length || 0
       })) : []
     },
-    {
-      title: "Popular Series",
-      description: "",
-      dramas: dramas && dramas.length > 1 ? dramas.slice(1, 10).map(d => ({
-        ...d,
-        lastUpdated: d.episodes?.[0]?.created_at || d.created_at,
-        epCount: d.episodes?.length || 0
-      })) : []
-    }
   ];
 
   return (
@@ -156,10 +147,7 @@ export default async function Home() {
                       {/* Subtle hover glow / light effect */}
                       <div className="absolute inset-0 bg-primary/0 group-hover/card:bg-primary/10 transition-colors duration-500 pointer-events-none mix-blend-overlay"></div>
                       
-                      {/* NEW Badge */}
-                      <div className="absolute top-2 right-2 bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-[2px] tracking-wider shadow-sm z-10">
-                        EP {drama.epCount || 1}
-                      </div>
+                      {drama.epCount > 0 && (<div className="absolute top-2 right-2 bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-[2px] tracking-wider shadow-sm z-10">EP {drama.epCount}</div>)}
 
                       {/* Play Icon */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 z-10">
@@ -171,7 +159,7 @@ export default async function Home() {
                       </div>
                     </div>
                     <h3 className="font-medium text-textMain text-sm line-clamp-1">{drama.title}</h3>
-                    <p className="text-textMuted text-[11px] mt-0.5">{new Date(drama.created_at).getFullYear()} • {drama.status || 'Drama'}</p>
+                    <p className="text-textMuted text-[11px] mt-0.5">{new Date(drama.created_at).getFullYear()} â€¢ {drama.status || 'Drama'}</p>
                   </Link>
                 ))}
               </div>
@@ -180,7 +168,7 @@ export default async function Home() {
             {/* Subtle Film Strip Divider */}
             {index < sliders.length - 1 && (
               <div className="w-full text-center text-textMuted/10 text-xs tracking-[1em] mt-12 mb-4 pointer-events-none select-none">
-                ▣ ▣ ▣ ▣ ▣ ▣ ▣
+                â–£ â–£ â–£ â–£ â–£ â–£ â–£
               </div>
             )}
           </section>
@@ -191,3 +179,4 @@ export default async function Home() {
     </div>
   );
 }
+

@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
+import AdScripts from '@/components/AdScripts';
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -8,7 +9,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   metadataBase: new URL('https://ckdub.com'),
   title: {
-    default: "CKDub — Stream Korean, Chinese & Asian Dramas Dubbed in Hindi & English",
+    default: "CKDub â€” Stream Korean, Chinese & Asian Dramas Dubbed in Hindi & English",
     template: "%s | CKDub",
   },
   description: "Watch the best Korean Dramas, Chinese Dramas, and Thai series dubbed in high-quality Hindi and English audio. Free streaming, updated daily.",
@@ -16,13 +17,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "CKDub",
-    title: "CKDub — The Ultimate Asian Drama Streaming Experience",
+    title: "CKDub â€” The Ultimate Asian Drama Streaming Experience",
     description: "Stream premium Korean, Chinese, and Thai series dubbed in Hindi and English. Updated daily with new episodes.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CKDub — Stream Asian Dramas Dubbed in Hindi & English",
+    title: "CKDub â€” Stream Asian Dramas Dubbed in Hindi & English",
     description: "Your premium destination for dubbed Asian dramas.",
   },
   robots: {
@@ -61,44 +62,7 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Google AdSense Auto Ads */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9035042995715249"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-
-        {/* Monetag Push Notifications */}
-        <Script
-          src="https://5gvci.com/act/files/tag.min.js?z=11844932"
-          data-cfasync="false"
-          strategy="afterInteractive"
-        />
-
-        {/* Monetag Onclick Popunder */}
-        <Script
-          id="monetag-popunder"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(s){s.dataset.zone='11844948',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
-          }}
-        />
-
-        {/* Monetag In-Page Push Banner */}
-        <Script
-          id="monetag-in-page"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(s){s.dataset.zone='11844940',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
-          }}
-        />
-
-        {/* Adsterra Social Bar */}
-        <Script
-          strategy="afterInteractive"
-          src="https://pl31425888.profitableratecpmnetwork.com/eb/05/ca/eb05ca575029ef6605ab1f5e6a859334.js"
-        />
+        <AdScripts />
 
         {/* JSON-LD Organization Schema */}
         <script
@@ -175,3 +139,4 @@ export default function RootLayout({
     </html>
   );
 }
+

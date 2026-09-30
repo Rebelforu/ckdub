@@ -62,12 +62,17 @@ export default async function CategoryPage({ params }: Props) {
                         Ongoing
                       </div>
                     )}
-                    {/* Always show bottom title on horizontal cards for better UX */}
+                    {episodesCount > 0 && (
+                      <div className="absolute top-2 right-2 bg-[#E50914] text-white text-[10px] font-bold px-2 py-1 rounded shadow-md uppercase">
+                        {episodesCount} {episodesCount === 1 ? 'EP' : 'EPs'}
+                      </div>
+                    )}
+                    {/* Bottom title overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black via-black/80 to-transparent">
                       <h3 className="font-bold text-white line-clamp-1">{drama.title}</h3>
                       <div className="text-xs text-gray-300 mt-1 flex items-center justify-between">
                         <span>{drama.release_year || new Date(drama.created_at).getFullYear()}</span>
-                        <span>{episodesCount} Episodes</span>
+                        <span>{drama.status}</span>
                       </div>
                     </div>
                   </div>
