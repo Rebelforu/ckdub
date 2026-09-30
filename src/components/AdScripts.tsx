@@ -6,7 +6,7 @@ import Script from "next/script";
 export default function AdScripts() {
   const pathname = usePathname();
 
-  // Completely disable all ads in the admin panel routes
+  // Completely disable all ads on the admin panel
   if (pathname.startsWith('/ishuzubi')) {
     return null;
   }
@@ -21,29 +21,13 @@ export default function AdScripts() {
         strategy="afterInteractive"
       />
 
-      {/* Monetag Push Notifications */}
+      {/* Monetag Multitag — replaces all individual Monetag scripts */}
       <Script
-        src="https://5gvci.com/act/files/tag.min.js?z=11844932"
+        src="https://quge5.com/88/tag.min.js"
+        data-zone="288991"
+        async
         data-cfasync="false"
         strategy="afterInteractive"
-      />
-
-      {/* Monetag Onclick Popunder */}
-      <Script
-        id="monetag-popunder"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `(function(s){s.dataset.zone='11844948',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
-        }}
-      />
-
-      {/* Monetag In-Page Push Banner */}
-      <Script
-        id="monetag-in-page"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `(function(s){s.dataset.zone='11844940',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`,
-        }}
       />
     </>
   );
