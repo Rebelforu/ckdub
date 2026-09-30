@@ -1,4 +1,4 @@
-"use server";
+﻿"use server";
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -361,3 +361,22 @@ export async function deleteComment(formData: FormData) {
   if (error) throw new Error('Failed to delete comment');
   revalidatePath('/ishuzubi/comments');
 }
+
+export async function toggleFeatured(dramaId: string, featured: boolean) {
+  // Server-side admin auth guard — never trust client
+  const authClient = createClient();
+  const { data: { user }, error: authError } = await authClient.auth.getUser();
+  if (authError || !user || user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+    throw new Error('Unauthorized');
+  }
+  const supabase = getServiceSupabase();
+  // If setting featured=true, first clear any existing featured drama
+  if (featured) {
+    await supabase.from('dramas').update({ is_featured: false }).eq('is_featured', true);
+  }
+  const { error } = await supabase.from('dramas').update({ is_featured: featured }).eq('id', dramaId);
+  if (error) throw new Error('Failed to update featured status');
+  revalidatePath('/');
+  revalidatePath('/ishuzubi');
+}
+

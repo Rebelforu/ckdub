@@ -1,182 +1,231 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import Image from "next/image";
-import { timeAgo } from "@/lib/utils";
 import { getServiceSupabase } from "@/lib/supabase";
 
-export const revalidate = 3600; // Cache for 1 hour, revalidatePath will clear it early when updated
+export const revalidate = 3600;
 
 export default async function Home() {
   const supabase = getServiceSupabase();
-  
-  const { data: dramas } = await supabase
+
+  // Fetch featured drama first (admin-pinned), fallback to newest
+  const { data: featuredResult } = await supabase
     .from("dramas")
     .select("*, episodes(id, created_at, episode_number)")
+    .eq("is_featured", true)
+    .limit(1)
+    .single();
+
+  const { data: allDramas } = await supabase
+    .from("dramas")
+    .select("*, episodes(id, episode_number)")
     .order("created_at", { ascending: false })
-    .limit(15);
+    .limit(20);
 
-  const featuredDrama = dramas && dramas.length > 0 ? {
-    ...dramas[0],
-    lastUpdated: dramas[0].episodes?.[0]?.created_at || dramas[0].created_at,
-    epCount: dramas[0].episodes?.length || 0
-  } : {
-    id: "1",
-    title: "Queen of Tears",
-    slug: "queen-of-tears",
-    description: "The miraculous, thrilling and humorous love story of a married couple who manage to survive a crisis and stay together against all odds.",
-    poster_url: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop",
-    language: "Hindi Dub",
-    genres: ["Romance", "Drama"],
-    lastUpdated: new Date(Date.now() - 86400000 * 2).toISOString(),
-    epCount: 16
-  };
+  const hero = featuredResult || (allDramas && allDramas[0]) || null;
+  const heroEpCount = hero?.episodes?.length || 0;
 
-  const sliders = [
-    {
-      title: "Tonight's Picks",
-      description: "A few stories worth watching tonight.",
-      dramas: dramas && dramas.length > 0 ? dramas.slice(0, 10).map(d => ({
-        ...d,
-        lastUpdated: d.episodes?.[0]?.created_at || d.created_at,
-        epCount: d.episodes?.length || 0
-      })) : []
-    },
-  ];
+  // Grid dramas — exclude the hero to avoid duplicates
+  const gridDramas = (allDramas || []).filter((d) => d.id !== hero?.id);
 
   return (
-    <div className="pb-24">
-      {/* CINEMATIC HERO */}
-      <section className="relative w-full h-[80vh] min-h-[600px] mb-12 overflow-hidden bg-background">
-        
-        {/* Background Artwork */}
-        <div className="absolute inset-0 w-full h-full">
-          <Image 
-            src={featuredDrama.poster_url || featuredDrama.poster} 
-            alt={featuredDrama.title} 
-            fill 
-            className="object-cover opacity-60 object-top pointer-events-none select-none"
-            priority
-            draggable={false}
-          />
-          {/* Subtle gradient overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 to-transparent pointer-events-none" />
-          
-          {/* Film Grain Texture */}
-          <div className="film-grain"></div>
-        </div>
-        
-        {/* Content Container */}
-        <div className="container mx-auto px-6 lg:px-12 h-full flex flex-col justify-center relative z-10 pt-16">
-          <div className="max-w-2xl animate-fade-in">
-            
-            <div className="flex gap-4 mb-4 items-center flex-wrap">
-              <span className="text-primary font-bold tracking-widest text-[10px] uppercase border border-primary/30 px-2 py-0.5 rounded-sm bg-primary/5">
-                Featured
-              </span>
-              <span className="text-textMuted text-xs font-semibold uppercase tracking-widest">
-                {featuredDrama.genres?.[0] || 'Drama'}
-              </span>
-              <span className="text-textMuted text-xs font-semibold uppercase tracking-widest">
-                {new Date(featuredDrama.created_at || Date.now()).getFullYear()}
-              </span>
-              <span className="text-textMuted text-xs font-semibold uppercase tracking-widest">
-                {featuredDrama.epCount} Episodes
-              </span>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight leading-[1.1] text-textMain drop-shadow-lg font-serif">
-              {featuredDrama.title}
-            </h1>
-            
-            <p className="text-base md:text-lg text-textMuted mb-8 line-clamp-3 max-w-xl font-medium leading-relaxed">
-              {featuredDrama.description}
-            </p>
-            
-            <div className="flex flex-wrap gap-4 items-center">
-              <Link 
-                href={`/drama/${featuredDrama.slug}`} 
-                className="bg-textMain text-background hover:bg-white/90 px-8 py-3 rounded-md font-bold transition-all flex items-center gap-2 text-sm"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
-                </svg>
-                Watch Now
-              </Link>
-              <button className="bg-surface/60 backdrop-blur-sm hover:bg-surface border border-white/10 text-textMain px-8 py-3 rounded-md font-bold transition-all flex items-center gap-2 text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-textMuted">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Add to List
-              </button>
+    <div className="pb-24 bg-[#0D0E10]">
+
+      {/* ═══ HERO ═══ */}
+      {hero && (
+        <section className="relative w-full h-[88vh] min-h-[560px] overflow-hidden">
+          {/* Background image */}
+          <div className="absolute inset-0">
+            <Image
+              src={hero.backdrop_url || hero.poster_url || ""}
+              alt={hero.title}
+              fill
+              className="object-cover object-top"
+              priority
+              sizes="100vw"
+            />
+            {/* Gradient overlays */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0D0E10] via-[#0D0E10]/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0D0E10] via-transparent to-[#0D0E10]/30" />
+          </div>
+
+          {/* Hero content */}
+          <div className="relative z-10 h-full flex items-center">
+            <div className="container mx-auto px-6 lg:px-12 pt-20">
+              <div className="max-w-xl">
+                {/* Badges */}
+                <div className="flex flex-wrap items-center gap-2 mb-5">
+                  <span className="bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                    Featured
+                  </span>
+                  {hero.category && (
+                    <span className="bg-white/10 text-white/70 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-white/10">
+                      {hero.category === "korean" ? "K-Drama" : hero.category === "chinese" ? "C-Drama" : hero.category}
+                    </span>
+                  )}
+                  {heroEpCount > 0 && (
+                    <span className="bg-white/10 text-white/70 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-white/10">
+                      {heroEpCount} Episodes
+                    </span>
+                  )}
+                  {hero.status && (
+                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border ${
+                      hero.status === "Ongoing"
+                        ? "bg-green-500/20 text-green-400 border-green-500/30"
+                        : "bg-white/10 text-white/50 border-white/10"
+                    }`}>
+                      {hero.status}
+                    </span>
+                  )}
+                </div>
+
+                {/* Title */}
+                <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-[1.05] text-white drop-shadow-2xl mb-4">
+                  {hero.title}
+                </h1>
+
+                {/* Description */}
+                {hero.description && (
+                  <p className="text-white/60 text-sm md:text-base leading-relaxed line-clamp-3 mb-8 max-w-lg">
+                    {hero.description}
+                  </p>
+                )}
+
+                {/* CTA Buttons */}
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href={`/drama/${hero.slug}#episodes`}
+                    className="flex items-center gap-2.5 bg-white text-black hover:bg-white/90 px-7 py-3 rounded-full font-black text-sm transition-all shadow-xl shadow-black/30"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                      <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
+                    </svg>
+                    Watch Now
+                  </Link>
+                  <Link
+                    href={`/drama/${hero.slug}`}
+                    className="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 text-white px-7 py-3 rounded-full font-bold text-sm transition-all border border-white/20 backdrop-blur-sm"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    More Info
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Bottom fade to grid */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0D0E10] to-transparent" />
+        </section>
+      )}
+
+      {/* ═══ DRAMA GRID ═══ */}
+      <div className="container mx-auto px-6 lg:px-12 mt-4">
+
+        {/* Section header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-black text-white tracking-tight">All Series</h2>
+            <p className="text-white/40 text-sm mt-1">New episodes added regularly</p>
+          </div>
+          <Link
+            href="/browse"
+            className="text-xs font-bold text-white/50 hover:text-white transition-colors flex items-center gap-1.5 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full border border-white/10"
+          >
+            Browse All
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
-      </section>
 
-
-
-      {/* CINEMATIC SLIDERS */}
-      <div className="container mx-auto px-6 lg:px-12 space-y-16">
-        {sliders.map((slider, index) => (
-          slider.dramas.length > 0 && (
-          <section key={index} className="relative group">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-textMain tracking-tight">{slider.title}</h2>
-              {slider.description && <p className="text-textMuted text-sm mt-1">{slider.description}</p>}
-            </div>
-            
-            <div className="relative">
-              <div className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide snap-x" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                {slider.dramas.map((drama: any) => (
-                  <Link 
-                    href={`/drama/${drama.slug}`} 
-                    key={drama.id} 
-                    className="w-[280px] md:w-[320px] lg:w-[360px] snap-start flex-shrink-0 group/card transition-all duration-300 relative"
-                  >
-                    <div className="relative aspect-video rounded-sm overflow-hidden bg-black mb-3 border border-white/5 group-hover/card:border-white/20 group-hover/card:-translate-y-1 transition-all duration-300 flex items-center justify-center">
-                      <Image 
-                        src={drama.backdrop_url || drama.poster_url || drama.poster} 
-                        alt={drama.title} 
-                        fill 
-                        sizes="(max-width: 768px) 280px, (max-width: 1024px) 320px, 360px"
-                        className="object-contain pointer-events-none select-none transition-transform duration-500 group-hover/card:scale-[1.02]"
-                        draggable={false}
+        {/* Grid */}
+        {gridDramas.length === 0 ? (
+          <div className="text-center py-24 text-white/30">
+            <div className="text-5xl mb-4">🎬</div>
+            <p>No dramas yet. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {gridDramas.map((drama) => {
+              const epCount = drama.episodes?.length || 0;
+              return (
+                <Link
+                  key={drama.id}
+                  href={`/drama/${drama.slug}`}
+                  className="group relative block"
+                >
+                  <div className="relative aspect-video rounded-xl overflow-hidden bg-[#1a1b1f] border border-white/5 transition-all duration-300 group-hover:border-white/25 group-hover:scale-[1.04] group-hover:shadow-2xl group-hover:shadow-black/60">
+                    {drama.backdrop_url || drama.poster_url ? (
+                      <Image
+                        src={drama.backdrop_url || drama.poster_url}
+                        alt={drama.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                       />
-                      
-                      {/* Subtle hover glow / light effect */}
-                      <div className="absolute inset-0 bg-primary/0 group-hover/card:bg-primary/10 transition-colors duration-500 pointer-events-none mix-blend-overlay"></div>
-                      
-                      {drama.epCount > 0 && (<div className="absolute top-2 right-2 bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-[2px] tracking-wider shadow-sm z-10">EP {drama.epCount}</div>)}
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white/10">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                        </svg>
+                      </div>
+                    )}
 
-                      {/* Play Icon */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 z-10">
-                        <div className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/20 flex items-center justify-center transform scale-90 group-hover/card:scale-100 transition-transform">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white ml-0.5">
-                            <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
-                          </svg>
-                        </div>
+                    {/* Dark overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
+
+                    {/* EP count badge */}
+                    {epCount > 0 && (
+                      <div className="absolute top-2 right-2 bg-primary text-white text-[9px] font-black px-2 py-0.5 rounded-md tracking-wider shadow-lg">
+                        {epCount} EP
+                      </div>
+                    )}
+
+                    {/* Status badge */}
+                    {drama.status === "Ongoing" && (
+                      <div className="absolute top-2 left-2 bg-green-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                        Live
+                      </div>
+                    )}
+
+                    {/* Play button on hover */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white ml-0.5">
+                          <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
+                        </svg>
                       </div>
                     </div>
-                    <h3 className="font-medium text-textMain text-sm line-clamp-1">{drama.title}</h3>
-                    <p className="text-textMuted text-[11px] mt-0.5">{new Date(drama.created_at).getFullYear()} â€¢ {drama.status || 'Drama'}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-            
-            {/* Subtle Film Strip Divider */}
-            {index < sliders.length - 1 && (
-              <div className="w-full text-center text-textMuted/10 text-xs tracking-[1em] mt-12 mb-4 pointer-events-none select-none">
-                â–£ â–£ â–£ â–£ â–£ â–£ â–£
-              </div>
-            )}
-          </section>
-          )
-        ))}
+
+                    {/* Bottom title */}
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <h3 className="text-white font-bold text-xs line-clamp-1 drop-shadow-lg">{drama.title}</h3>
+                      <p className="text-white/50 text-[10px] mt-0.5">{drama.release_year || new Date(drama.created_at).getFullYear()} · {drama.status}</p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        {/* View More CTA */}
+        {gridDramas.length >= 19 && (
+          <div className="text-center mt-12">
+            <Link
+              href="/browse"
+              className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-8 py-3.5 rounded-full font-bold text-sm border border-white/10 hover:border-white/20 transition-all"
+            >
+              View All Dramas
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        )}
       </div>
-      
     </div>
   );
 }
-

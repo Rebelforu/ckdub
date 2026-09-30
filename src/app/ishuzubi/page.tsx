@@ -1,7 +1,8 @@
-import { getServiceSupabase } from "@/lib/supabase";
+﻿import { getServiceSupabase } from "@/lib/supabase";
 import AdminAuth from "./AdminAuth";
 import AdminModals from "./AdminModals";
 import EditDramaModal from "@/components/EditDramaModal";
+import FeaturedToggle from "@/components/FeaturedToggle";
 import { timeAgo } from "@/lib/utils";
 import { redis } from "@/lib/redis";
 
@@ -131,9 +132,7 @@ export default async function AdminDashboard() {
                     <td className="px-6 py-4 text-xs text-textMuted">
                       {lastEpDate ? timeAgo(lastEpDate) : timeAgo(drama.created_at)}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <EditDramaModal drama={drama} />
-                    </td>
+                    <td className="px-6 py-4 text-right"><div className="flex items-center justify-end gap-2"><FeaturedToggle dramaId={drama.id} isFeatured={drama.is_featured || false} /><EditDramaModal drama={drama} /></div></td>
                   </tr>
                 )})}
                 {(!dramas || dramas.length === 0) && (
@@ -156,3 +155,4 @@ export default async function AdminDashboard() {
     </AdminAuth>
   );
 }
+
