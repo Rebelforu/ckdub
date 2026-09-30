@@ -21,12 +21,20 @@ export default function AdScripts() {
         strategy="afterInteractive"
       />
 
-      {/* Monetag Multitag — replaces all individual Monetag scripts */}
+      {/* Monetag Multitag — all-in-one (Popunder, In-Page Push, Vignette, etc.) */}
       <Script
         src="https://quge5.com/88/tag.min.js"
         data-zone="288991"
         async
         data-cfasync="false"
+        strategy="afterInteractive"
+      />
+
+      {/* Monetag Push Notifications */}
+      <Script
+        src="https://5gvci.com/act/files/tag.min.js?z=11926250"
+        data-cfasync="false"
+        async
         strategy="afterInteractive"
       />
     </>
