@@ -81,7 +81,7 @@ export default function EditDramaModal({ drama }: { drama: any }) {
                         <option value="Hindi Dub">Hindi Dub</option>
                         <option value="English Dub">English Dub</option>
                         <option value="Multi Audio">Multi Audio</option>
-                        <option value="Original Audio">Original Audio</option>
+                        <option value="Eng Sub (Original Audio)">Eng Sub (Original Audio)</option>`n                        <option value="Hindi Sub">Hindi Sub</option>
                       </select>
                     </div>
                 </div>
@@ -190,6 +190,7 @@ export default function EditDramaModal({ drama }: { drama: any }) {
     </>
   );
 }
+
 
 
 

@@ -200,7 +200,7 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
                   <option value="Hindi Dub">Hindi Dub</option>
                   <option value="English Dub">English Dub</option>
                   <option value="Multi Audio">Multi Audio</option>
-                  <option value="Original Audio">Original Audio</option>
+                  <option value="Eng Sub (Original Audio)">Eng Sub (Original Audio)</option>`n                  <option value="Hindi Sub">Hindi Sub</option>
                 </select>
                 <input type="hidden" name="audio_languages" value="Multiple" />
                 <input type="hidden" name="subtitle_languages" value="English" />
@@ -299,5 +299,6 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
     </>
   );
 }
+
 
 
