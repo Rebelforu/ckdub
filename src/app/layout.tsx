@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import AdScripts from '@/components/AdScripts';
 import { Inter } from "next/font/google";
 import Script from "next/script";
@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   metadataBase: new URL('https://ckdub.com'),
   title: {
-    default: "CKDub â€” Stream Korean, Chinese & Asian Dramas Dubbed in Hindi & English",
+    default: "CKDub Ã¢â‚¬â€ Stream Korean, Chinese & Asian Dramas Dubbed in Hindi & English",
     template: "%s | CKDub",
   },
   description: "Watch the best Korean Dramas, Chinese Dramas, and Thai series dubbed in high-quality Hindi and English audio. Free streaming, updated daily.",
@@ -18,13 +18,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "CKDub",
-    title: "CKDub â€” The Ultimate Asian Drama Streaming Experience",
+    title: "CKDub Ã¢â‚¬â€ The Ultimate Asian Drama Streaming Experience",
     description: "Stream premium Korean, Chinese, and Thai series dubbed in Hindi and English. Updated daily with new episodes.",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CKDub â€” Stream Asian Dramas Dubbed in Hindi & English",
+    title: "CKDub Ã¢â‚¬â€ Stream Asian Dramas Dubbed in Hindi & English",
     description: "Your premium destination for dubbed Asian dramas.",
   },
   robots: {
@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     },
   },
   verification: {},
+  other: {
+    "google-adsense-account": "ca-pub-9035042995715249"
+  }
 };
 
 export default function RootLayout({
@@ -140,5 +143,6 @@ export default function RootLayout({
       </body></html>
   );
 }
+
 
 
