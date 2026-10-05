@@ -1,13 +1,15 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 
 export default function ClientEpisodeButton({ 
   episodeNumber, 
-  dramaSlug
+  dramaSlug,
+  category
 }: { 
   episodeNumber: number; 
   dramaSlug: string;
+  category?: string;
 }) {
   return (
     <Link 
@@ -24,7 +26,7 @@ export default function ClientEpisodeButton({
         
         {/* Episode Number */}
         <div className="flex flex-col">
-          <span className="text-[10px] uppercase tracking-widest opacity-60">Episode</span>
+          <span className="text-[10px] uppercase tracking-widest opacity-60">{category === 'ai_series' ? 'Part / Season' : 'Episode'}</span>
           <span className="text-lg font-bold text-white tracking-tight">{episodeNumber}</span>
         </div>
       </div>
@@ -38,3 +40,4 @@ export default function ClientEpisodeButton({
     </Link>
   );
 }
+

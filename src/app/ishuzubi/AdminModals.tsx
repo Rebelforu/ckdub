@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -91,7 +91,7 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-textMuted mb-2">Alternative / Native Titles</label>
-                    <input name="alt_titles" type="text" placeholder="e.g. 오징어 게임, Squid Game" className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white" />
+                    <input name="alt_titles" type="text" placeholder="e.g. ì˜¤ì§•ì–´ ê²Œìž„, Squid Game" className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-textMuted mb-2">Category</label>
@@ -99,7 +99,8 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
                       <option value="korean">Korean Series</option>
                       <option value="chinese">Chinese Series</option>
                       <option value="english">English Series</option>
-                    </select>
+                        <option value="ai_series">AI Original</option>
+                      </select>
                   </div>
                 </div>
               </div>
@@ -192,10 +193,18 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
                 </div>
               </div>
 
-              {/* Hidden fields mapped for compatibility */}
-              <input type="hidden" name="language" value="Hindi Dub" />
-              <input type="hidden" name="audio_languages" value="Hindi, Korean" />
-              <input type="hidden" name="subtitle_languages" value="English" />
+              {/* Language Selection */}
+              <div className="bg-[#18191E] p-4 rounded-xl border border-white/5 mt-6 mb-4">
+                <label className="block text-xs font-bold text-textMuted mb-3 uppercase tracking-widest">Language & Audio</label>
+                <select name="language" className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white">
+                  <option value="Hindi Dub">Hindi Dub</option>
+                  <option value="English Dub">English Dub</option>
+                  <option value="Multi Audio">Multi Audio</option>
+                  <option value="Original Audio">Original Audio</option>
+                </select>
+                <input type="hidden" name="audio_languages" value="Multiple" />
+                <input type="hidden" name="subtitle_languages" value="English" />
+              </div>
 
               <div className="pt-4 flex justify-end gap-3 border-t border-white/5 sticky bottom-0 bg-[#111] pb-2">
                 <button type="button" onClick={() => setActiveModal('none')} disabled={isPending} className="px-5 py-2.5 text-sm font-medium text-textMuted hover:text-white disabled:opacity-50">Cancel</button>
@@ -290,3 +299,5 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
     </>
   );
 }
+
+

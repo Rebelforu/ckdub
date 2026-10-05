@@ -1,4 +1,4 @@
-import Image from 'next/image';
+﻿import Image from 'next/image';
 import Link from 'next/link';
 import { timeAgo } from '@/lib/utils';
 import ClientEpisodeButton from './ClientEpisodeButton';
@@ -136,20 +136,20 @@ export default async function DramaDetail({ params }: { params: { slug: string }
             <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm font-bold mb-6 text-[#92949A] uppercase tracking-wider">
               {drama.category && (
                 <span className="text-primary bg-primary/10 px-3 py-1 rounded font-bold">
-                  {drama.category === 'korean' ? 'K-Drama' : drama.category === 'chinese' ? 'C-Drama' : drama.category}
+                  {drama.category === 'korean' ? 'K-Drama' : drama.category === 'chinese' ? 'C-Drama' : drama.category === 'ai_series' ? 'AI Original ✨' : drama.category}
                 </span>
               )}
               <span>{drama.release_year || new Date().getFullYear()}</span>
-              <span>•</span>
+              <span>â€¢</span>
               <span>{drama.category || 'Korean Drama'}</span>
-              <span>•</span>
+              <span>â€¢</span>
               <span>{drama.total_episodes ? `${drama.total_episodes} Episodes` : `${episodes.length} Episodes`}</span>
-              <span>•</span>
+              <span>â€¢</span>
               <span className="text-white">Hindi Dubbed</span>
               
               {drama.content_rating && (
                 <>
-                  <span>•</span>
+                  <span>â€¢</span>
                   <span className="px-2 py-0.5 border border-[#92949A] rounded text-[10px]">{drama.content_rating}</span>
                 </>
               )}
@@ -212,7 +212,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
               )}
               <div>
                 <span className="font-semibold text-white mr-2">Language:</span>
-                <span>Korean (Available in Hindi Dubbed)</span>
+                <span>{drama.language || 'Hindi Dub'}</span>
               </div>
               {drama.network && (
                 <div>
@@ -271,6 +271,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                 key={ep.id || ep.episode_number}
                 episodeNumber={ep.episode_number}
                 dramaSlug={params.slug}
+                category={drama.category}
               />
             ))}
           </div>
@@ -314,7 +315,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                 </div>
                 <div>
                   <h3 className="text-emerald-300 font-bold text-lg">Wanna Start Earning?</h3>
-                  <p className="text-[#92949A] text-sm">Join TeraBox and start earning rewards today — it's free!</p>
+                  <p className="text-[#92949A] text-sm">Join TeraBox and start earning rewards today â€” it's free!</p>
                 </div>
               </div>
               <svg className="w-6 h-6 text-emerald-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
@@ -357,8 +358,10 @@ export default async function DramaDetail({ params }: { params: { slug: string }
 
       {/* Private Admin Feedback Form */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <CommentForm dramaSlug={params.slug} />
+        <CommentForm dramaSlug={params.slug}
+                category={drama.category} />
       </section>
     </main>
   );
 }
+

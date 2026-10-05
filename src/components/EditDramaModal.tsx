@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -72,8 +72,18 @@ export default function EditDramaModal({ drama }: { drama: any }) {
                       <option value="Chinese Series">Chinese Series</option>
                       <option value="Japanese Series">Japanese Series</option>
                       <option value="Thai Series">Thai Series</option>
+                        <option value="AI Original">AI Original</option>
                     </select>
-                  </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-textMuted mb-2">Language</label>
+                      <select name="language" defaultValue={drama.language || "Hindi Dub"} className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white">
+                        <option value="Hindi Dub">Hindi Dub</option>
+                        <option value="English Dub">English Dub</option>
+                        <option value="Multi Audio">Multi Audio</option>
+                        <option value="Original Audio">Original Audio</option>
+                      </select>
+                    </div>
                 </div>
               </div>
 
@@ -180,4 +190,7 @@ export default function EditDramaModal({ drama }: { drama: any }) {
     </>
   );
 }
+
+
+
 

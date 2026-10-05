@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Image from "next/image";
 import { getServiceSupabase } from "@/lib/supabase";
 
@@ -24,13 +24,13 @@ export default async function Home() {
   const hero = featuredResult || (allDramas && allDramas[0]) || null;
   const heroEpCount = hero?.episodes?.length || 0;
 
-  // Grid dramas — exclude the hero to avoid duplicates
+  // Grid dramas â€” exclude the hero to avoid duplicates
   const gridDramas = (allDramas || []).filter((d) => d.id !== hero?.id);
 
   return (
     <div className="pb-24 bg-[#0D0E10]">
 
-      {/* ═══ HERO ═══ */}
+      {/* â•â•â• HERO â•â•â• */}
       {hero && (
         <section className="relative w-full h-[88vh] min-h-[560px] overflow-hidden">
           {/* Background image */}
@@ -59,7 +59,7 @@ export default async function Home() {
                   </span>
                   {hero.category && (
                     <span className="bg-white/10 text-white/70 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border border-white/10">
-                      {hero.category === "korean" ? "K-Drama" : hero.category === "chinese" ? "C-Drama" : hero.category}
+                      {hero.category === "korean" ? "K-Drama" : hero.category === "chinese" ? "C-Drama" : hero.category === "ai_series" ? "AI Original ✨" : hero.category}
                     </span>
                   )}
                   {heroEpCount > 0 && (
@@ -120,7 +120,7 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ═══ DRAMA GRID ═══ */}
+      {/* â•â•â• DRAMA GRID â•â•â• */}
       <div className="container mx-auto px-6 lg:px-12 mt-4">
 
         {/* Section header */}
@@ -143,7 +143,7 @@ export default async function Home() {
         {/* Grid */}
         {gridDramas.length === 0 ? (
           <div className="text-center py-24 text-white/30">
-            <div className="text-5xl mb-4">🎬</div>
+            <div className="text-5xl mb-4">ðŸŽ¬</div>
             <p>No dramas yet. Check back soon!</p>
           </div>
         ) : (
@@ -202,7 +202,7 @@ export default async function Home() {
                     {/* Bottom title */}
                     <div className="absolute bottom-0 left-0 right-0 p-2.5">
                       <h3 className="text-white font-bold text-xs line-clamp-1 drop-shadow-lg">{drama.title}</h3>
-                      <p className="text-white/50 text-[10px] mt-0.5">{drama.release_year || new Date(drama.created_at).getFullYear()} · {drama.status}</p>
+                      <p className="text-white/50 text-[10px] mt-0.5">{drama.release_year || new Date(drama.created_at).getFullYear()} Â· {drama.status}</p>
                     </div>
                   </div>
                 </Link>
@@ -229,3 +229,4 @@ export default async function Home() {
     </div>
   );
 }
+
