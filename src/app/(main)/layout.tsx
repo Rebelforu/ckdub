@@ -1,69 +1,107 @@
+"use client";
 import Link from "next/link";
 import AdBlockDetector from "@/components/AdBlockDetector";
 import SearchBar from "@/components/SearchBar";
+import { useState } from "react";
 
 export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = [
+    { name: 'Discover', path: '/' },
+    { name: 'Browse', path: '/browse' },
+    { name: 'K-Dramas', path: '/category/korean' },
+    { name: 'C-Dramas', path: '/category/chinese' },
+    { name: 'Blog', path: '/blog' },
+    { name: 'Request', path: '/request' },
+  ];
+
   return (
     <>
-      {/* Futuristic Floating Navbar */}
-      <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-5xl transition-all duration-500">
-        <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-3xl px-6 py-3 flex items-center justify-between">
-          
+      {/* Floating Navbar */}
+      <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-5xl transition-all duration-500">
+        <div className="bg-black/60 backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-2xl px-5 py-3 flex items-center justify-between">
+
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shadow-[0_0_15px_rgba(229,9,20,0.4)] group-hover:shadow-[0_0_25px_rgba(229,9,20,0.6)] transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white ml-0.5">
+          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-[0_0_12px_rgba(229,9,20,0.4)] group-hover:shadow-[0_0_22px_rgba(229,9,20,0.6)] transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-white ml-0.5">
                 <path fillRule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clipRule="evenodd" />
               </svg>
             </div>
-            <span className="text-xl font-bold tracking-tight text-white hidden sm:block">CK<span className="text-primary">Dub</span></span>
+            <span className="text-lg font-bold tracking-tight text-white">CK<span className="text-primary">Dub</span></span>
           </Link>
-          
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-black/20 rounded-full px-2 py-1 border border-white/5">
-            {[
-              { name: 'Discover', path: '/' },
-              { name: 'Browse', path: '/browse' },
-              { name: 'K-Dramas', path: '/category/korean' },
-              { name: 'C-Dramas', path: '/category/chinese' },
-            ].map((item) => (
-              <Link 
-                key={item.name} 
-                href={item.path} 
-                className="px-5 py-2 rounded-full text-[13px] font-semibold text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300"
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-1 bg-white/5 rounded-full px-2 py-1 border border-white/5">
+            {navLinks.slice(0, 4).map((item) => (
+              <Link
+                key={item.name}
+                href={item.path}
+                className="px-4 py-2 rounded-full text-[13px] font-semibold text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200"
               >
                 {item.name}
               </Link>
             ))}
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-2">
             <SearchBar />
-            <Link href="/request" className="hidden sm:flex items-center gap-2 text-[13px] font-bold text-white bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-full transition-all border border-white/10 shadow-lg">
+            <Link href="/request" className="text-[13px] font-bold text-white bg-primary/90 hover:bg-primary px-5 py-2 rounded-full transition-all shadow-lg">
               Request
             </Link>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-surfaceLighter to-surface border border-white/10 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white/50">
-                <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
-              </svg>
-            </div>
           </div>
-          
+
+          {/* Mobile: Search + Hamburger */}
+          <div className="flex md:hidden items-center gap-2">
+            <SearchBar />
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {mobileOpen && (
+          <div className="mt-2 bg-black/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 flex flex-col gap-1 md:hidden shadow-2xl">
+            {navLinks.map((item) => (
+              <Link
+                key={item.name}
+                href={item.path}
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-all"
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        )}
       </header>
 
       {/* Ad Block Detection */}
       <AdBlockDetector />
-      
+
       <main className="flex-1 animate-fade-in relative z-10">
         {children}
       </main>
-      
+
       {/* Footer */}
       <footer className="bg-[#0a0a0a] border-t border-white/[0.05] mt-24">
         <div className="container mx-auto px-6 lg:px-12 py-16 grid grid-cols-1 md:grid-cols-4 gap-12 text-sm">

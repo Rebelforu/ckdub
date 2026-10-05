@@ -1,8 +1,9 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import AdScripts from '@/components/AdScripts';
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -135,8 +136,9 @@ export default function RootLayout({
             `
           }}
         />
-      </body>
-    </html>
+        <ScrollToTop />
+      </body></html>
   );
 }
+
 
