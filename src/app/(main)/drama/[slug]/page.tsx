@@ -271,7 +271,8 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                 key={ep.id || ep.episode_number}
                 episodeNumber={ep.episode_number}
                 dramaSlug={params.slug}
-                category={drama.category}
+                  videoUrl={ep.terabox_url}
+                  category={drama.category}
               />
             ))}
           </div>
@@ -359,9 +360,12 @@ export default async function DramaDetail({ params }: { params: { slug: string }
       {/* Private Admin Feedback Form */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <CommentForm dramaSlug={params.slug}
-                category={drama.category} />
+                  videoUrl={ep.terabox_url}
+                  category={drama.category} />
       </section>
     </main>
   );
 }
+
+
 
