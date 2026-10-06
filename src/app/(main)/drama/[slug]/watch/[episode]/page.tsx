@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import { getServiceSupabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
@@ -90,7 +90,7 @@ export default async function WatchPage({ params }: Props) {
               Back to Drama
             </Link>
             <h1 className="text-xl font-bold truncate max-w-md">
-              {drama.title} <span className="text-[#92949A] font-normal">— Episode {episodeNumber}</span>
+              {drama.title} <span className="text-[#92949A] font-normal">â€” Episode {episodeNumber}</span>
             </h1>
           </div>
           
@@ -112,7 +112,7 @@ export default async function WatchPage({ params }: Props) {
           <div className="lg:col-span-9 flex flex-col gap-6">
             
             {/* Video Player & Server Selection */}
-            <VideoPlayer episode={currentEpisode} />
+            <VideoPlayer episode={currentEpisode} drama={drama} />
 
             {/* Episode Navigation */}
             <div className="flex items-center justify-between bg-[#141519] p-4 rounded-xl border border-[#1C1D22]">
@@ -218,3 +218,4 @@ export default async function WatchPage({ params }: Props) {
     </div>
   );
 }
+
