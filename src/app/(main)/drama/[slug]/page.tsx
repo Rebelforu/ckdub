@@ -336,7 +336,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                 <Link key={rel.id} href={`/drama/${rel.slug}`} className="group block">
                   <div className="relative aspect-video rounded-xl overflow-hidden bg-[#141519] border border-white/5 group-hover:border-white/20 group-hover:scale-[1.04] transition-all duration-300 group-hover:shadow-xl group-hover:shadow-black/50">
                     {rel.backdrop_url || rel.poster_url ? (
-                      <Image src={rel.backdrop_url || rel.poster_url} alt={rel.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="200px" />
+                      <Image src={rel.backdrop_url || rel.poster_url} alt={rel.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw" />
                     ) : (
                       <div className="w-full h-full bg-[#1C1D22] flex items-center justify-center text-white/10">
                         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M15 10l4.553-2.069A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" /></svg>
@@ -364,6 +364,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
     </main>
   );
 }
+
 
 
 

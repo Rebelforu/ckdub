@@ -109,7 +109,7 @@ export default async function WatchPage({ params }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* LEFT: Video Player and Info */}
-          <div className="lg:col-span-9 flex flex-col gap-6">
+          <div className="lg:col-span-12 flex flex-col gap-6">
             
             {/* Video Player & Server Selection */}
             <VideoPlayer episode={currentEpisode} drama={drama} />
@@ -200,17 +200,7 @@ export default async function WatchPage({ params }: Props) {
             
           </div>
 
-          {/* RIGHT: Sidebar Advertisement */}
-          <div className="lg:col-span-3 hidden lg:block">
-            <div className="sticky top-[100px] w-full bg-[#141519] border border-[#1C1D22] rounded-2xl overflow-hidden p-4">
-              <div className="text-center mb-3">
-                <span className="text-[#92949A] text-[9px] uppercase tracking-[0.2em] font-bold">Sponsored</span>
-              </div>
-              {/* Adsterra Native Banner */}
-              <script async data-cfasync="false" src="https://pl31384983.profitableratecpmnetwork.com/4de4d6df87525034f24c86c4bc7babff/invoke.js"></script>
-              <div id="container-4de4d6df87525034f24c86c4bc7babff"></div>
-            </div>
-          </div>
+          
 
         </div>
 
@@ -218,4 +208,5 @@ export default async function WatchPage({ params }: Props) {
     </div>
   );
 }
+
 
