@@ -359,13 +359,12 @@ export default async function DramaDetail({ params }: { params: { slug: string }
 
       {/* Private Admin Feedback Form */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <CommentForm dramaSlug={params.slug}
-                  videoUrl={ep.terabox_url}
-                  category={drama.category} />
+        <CommentForm dramaSlug={params.slug} />
       </section>
     </main>
   );
 }
+
 
 
 
