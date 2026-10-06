@@ -18,13 +18,13 @@ export default async function Home() {
   const { data: allDramas } = await supabase
     .from("dramas")
     .select("*, episodes(id, episode_number)")
-    .order("created_at", { ascending: false })
+    .order("updated_at", { ascending: false })
     .limit(20);
 
   const hero = featuredResult || (allDramas && allDramas[0]) || null;
   const heroEpCount = hero?.episodes?.length || 0;
 
-  // Grid dramas â€” exclude the hero to avoid duplicates
+  // Grid dramas — exclude the hero to avoid duplicates
   const gridDramas = (allDramas || []).filter((d) => d.id !== hero?.id);
 
   return (
@@ -202,7 +202,7 @@ export default async function Home() {
                     {/* Bottom title */}
                     <div className="absolute bottom-0 left-0 right-0 p-2.5">
                       <h3 className="text-white font-bold text-xs line-clamp-1 drop-shadow-lg">{drama.title}</h3>
-                      <p className="text-white/50 text-[10px] mt-0.5">{drama.release_year || new Date(drama.created_at).getFullYear()} Â· {drama.status}</p>
+                      <p className="text-white/50 text-[10px] mt-0.5">{drama.release_year || new Date(drama.created_at).getFullYear()} • {drama.status}</p>
                     </div>
                   </div>
                 </Link>
@@ -229,4 +229,5 @@ export default async function Home() {
     </div>
   );
 }
+
 

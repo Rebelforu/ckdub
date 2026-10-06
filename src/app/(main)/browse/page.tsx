@@ -29,7 +29,7 @@ export default async function BrowsePage({
   if (statusFilter) dbQuery = dbQuery.eq('status', statusFilter);
 
   const { data: dramas, count } = await dbQuery
-    .order('created_at', { ascending: false })
+    .order('updated_at', { ascending: false })
     .range(from, to);
 
   const totalPages = count ? Math.ceil(count / limit) : 1;
@@ -75,7 +75,7 @@ export default async function BrowsePage({
             type="text"
             name="q"
             defaultValue={q}
-            placeholder="Search by drama titleâ€¦"
+            placeholder="Search by drama title..."
             className="flex-1 bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-primary transition-colors"
           />
           <button
@@ -89,7 +89,7 @@ export default async function BrowsePage({
               href={buildHref({ q: '', page: '1' })}
               className="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-full text-sm font-semibold transition-colors"
             >
-              âœ•
+              ✕
             </Link>
           )}
         </form>
@@ -228,7 +228,7 @@ export default async function BrowsePage({
               .map((p, idx, arr) => (
                 <span key={p} className="flex items-center gap-2">
                   {idx > 0 && arr[idx - 1] !== p - 1 && (
-                    <span className="text-white/30 px-1">â€¦</span>
+                    <span className="text-white/30 px-1">...</span>
                   )}
                   <Link
                     href={buildHref({ page: String(p) })}
@@ -247,7 +247,7 @@ export default async function BrowsePage({
                 href={buildHref({ page: String(page + 1) })}
                 className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 transition-colors"
               >
-                Next â†’
+                Next →
               </Link>
             )}
           </div>
@@ -256,4 +256,5 @@ export default async function BrowsePage({
     </div>
   );
 }
+
 

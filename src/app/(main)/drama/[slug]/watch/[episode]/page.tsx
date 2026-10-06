@@ -90,7 +90,7 @@ export default async function WatchPage({ params }: Props) {
               Back to Drama
             </Link>
             <h1 className="text-xl font-bold truncate max-w-md">
-              {drama.title} <span className="text-[#92949A] font-normal">â€” Episode {episodeNumber}</span>
+              {drama.title} <span className="text-[#92949A] font-normal">— Episode {episodeNumber}</span>
             </h1>
           </div>
           

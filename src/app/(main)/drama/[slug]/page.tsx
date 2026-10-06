@@ -140,16 +140,16 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                 </span>
               )}
               <span>{drama.release_year || new Date().getFullYear()}</span>
-              <span>â€¢</span>
+              <span>•</span>
               <span>{drama.category || 'Korean Drama'}</span>
-              <span>â€¢</span>
+              <span>•</span>
               <span>{drama.total_episodes ? `${drama.total_episodes} Episodes` : `${episodes.length} Episodes`}</span>
-              <span>â€¢</span>
+              <span>•</span>
               <span className="text-white">Hindi Dubbed</span>
               
               {drama.content_rating && (
                 <>
-                  <span>â€¢</span>
+                  <span>•</span>
                   <span className="px-2 py-0.5 border border-[#92949A] rounded text-[10px]">{drama.content_rating}</span>
                 </>
               )}
@@ -316,7 +316,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                 </div>
                 <div>
                   <h3 className="text-emerald-300 font-bold text-lg">Wanna Start Earning?</h3>
-                  <p className="text-[#92949A] text-sm">Join TeraBox and start earning rewards today â€” it's free!</p>
+                  <p className="text-[#92949A] text-sm">Join TeraBox and start earning rewards today — it's free!</p>
                 </div>
               </div>
               <svg className="w-6 h-6 text-emerald-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
