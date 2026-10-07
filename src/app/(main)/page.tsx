@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import Image from "next/image";
 import { getServiceSupabase } from "@/lib/supabase";
 
@@ -163,7 +163,7 @@ export default async function Home() {
                         alt={drama.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
-                        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-white/10">
