@@ -1,4 +1,4 @@
-﻿import Image from 'next/image';
+import Image from 'next/image';
 import Link from 'next/link';
 import { timeAgo } from '@/lib/utils';
 import ClientEpisodeButton from './ClientEpisodeButton';
@@ -6,8 +6,8 @@ import { getServiceSupabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import ViewTracker from '@/components/ViewTracker';
-import { redis } from '@/lib/redis';
 import CommentForm from '@/components/CommentForm';
+import { SITE_URL, categoryLabel, categoryCountry, audioLabel, audioLangCode, stripText } from '@/lib/site';
 
 export const revalidate = 3600;
 
@@ -15,30 +15,47 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const supabase = getServiceSupabase();
   const { data: drama } = await supabase
     .from('dramas')
-    .select('title, description, poster_url, backdrop_url, meta_description, alt_titles, release_year')
+    .select('title, description, short_description, poster_url, backdrop_url, meta_description, alt_titles, release_year, language, category, total_episodes, status, episodes(id)')
     .eq('slug', params.slug)
     .single();
 
-  if (!drama) return {};
+  if (!drama) return { title: 'Drama Not Found', robots: { index: false } };
 
-  const seoTitle = `${drama.title} ${drama.release_year ? `(${drama.release_year})` : ''} - Watch Hindi Dubbed | CKDub`;
-  const seoDescription = drama.meta_description || drama.description;
+  const audio = audioLabel(drama.language);
+  const eps = drama.episodes?.length || 0;
+  // Avoid "X Hindi Dubbed - Hindi Dubbed" when the admin title already contains it
+  const baseTitle = drama.title.replace(/\s*(hindi|english)\s*dubbed\s*$/i, '').trim();
+  const seoTitle = `${baseTitle}${drama.release_year ? ` (${drama.release_year})` : ''} ${audio} - All Episodes`;
+  const seoDescription = stripText(
+    drama.meta_description ||
+      `Watch ${baseTitle} ${audio} online. ${eps ? `${eps} episodes available` : 'Episodes'}${drama.status ? ` (${drama.status})` : ''}. ${drama.short_description || drama.description || ''}`,
+    160
+  );
+  const image = drama.backdrop_url || drama.poster_url;
+  const url = `${SITE_URL}/drama/${params.slug}`;
 
   return {
     title: seoTitle,
     description: seoDescription,
-    alternates: {
-      canonical: `https://ckdub.com/drama/${params.slug}`
-    },
+    keywords: [
+      `${baseTitle} ${audio}`, `${baseTitle} in Hindi`, `${baseTitle} all episodes`, `${baseTitle} watch online`,
+      `${baseTitle} episode 1`, `${categoryLabel(drama.category)} ${audio}`,
+      ...(drama.alt_titles ? drama.alt_titles.split(',').map((t: string) => t.trim()) : []),
+    ],
+    alternates: { canonical: url },
     openGraph: {
       title: seoTitle,
       description: seoDescription,
-      images: [drama.backdrop_url || drama.poster_url].filter(Boolean),
-      type: "video.tv_show",
+      url,
+      type: 'video.tv_show',
+      images: image ? [{ url: image, width: 1280, height: 720, alt: `${baseTitle} ${audio}` }] : undefined,
     },
-    other: {
-      "keywords": `${drama.title}, ${drama.alt_titles || ''}, Hindi Dubbed, Watch Online`
-    }
+    twitter: {
+      card: 'summary_large_image',
+      title: seoTitle,
+      description: seoDescription,
+      images: image ? [image] : undefined,
+    },
   };
 }
 
@@ -56,9 +73,9 @@ export default async function DramaDetail({ params }: { params: { slug: string }
 
   // Sort episodes by episode_number ascending
   const episodes = [...(drama.episodes || [])].sort((a: any, b: any) => a.episode_number - b.episode_number);
-  
-  const lastEpisode = episodes[episodes.length - 1];
-  const lastUpdated = lastEpisode?.created_at;
+
+  const latestEpisode = [...episodes].sort((a: any, b: any) => +new Date(b.created_at) - +new Date(a.created_at))[0];
+  const lastUpdated = latestEpisode?.created_at;
 
   // Fetch related dramas (same category, exclude current)
   const { data: relatedDramas } = await supabase
@@ -66,87 +83,147 @@ export default async function DramaDetail({ params }: { params: { slug: string }
     .select('id, title, slug, poster_url, backdrop_url, status, release_year, episodes(id)')
     .eq('category', drama.category || 'korean')
     .neq('id', drama.id)
-    .order('created_at', { ascending: false })
+    .order('updated_at', { ascending: false })
     .limit(6);
 
-  const schemaData = {
-    "@context": "https://schema.org",
-    "@type": "TVSeries",
-    "name": drama.title,
-    "alternateName": drama.alt_titles ? drama.alt_titles.split(',').map((t: string) => t.trim()) : undefined,
-    "description": drama.meta_description || drama.description,
-    "image": drama.backdrop_url || drama.poster_url,
-    "numberOfEpisodes": drama.total_episodes || episodes.length,
-    "datePublished": drama.release_year ? `${drama.release_year}-01-01` : undefined,
-    "inLanguage": drama.audio_languages || "hi",
-    "genre": Array.isArray(drama.genres) ? drama.genres : (drama.genres ? drama.genres.split(',') : ["Drama"]),
-    "actors": drama.cast_list ? drama.cast_list.split(',').map((actor: string) => ({
-      "@type": "Person",
-      "name": actor.trim()
-    })) : undefined
+  const url = `${SITE_URL}/drama/${params.slug}`;
+  const audio = audioLabel(drama.language);
+  const typeLabel = categoryLabel(drama.category);
+  const country = drama.country || categoryCountry(drama.category);
+  const baseTitle = drama.title.replace(/\s*(hindi|english)\s*dubbed\s*$/i, '').trim();
+  const epCount = episodes.length;
+  const totalEps = drama.total_episodes && drama.total_episodes > epCount ? drama.total_episodes : epCount;
+  const genres: string[] = Array.isArray(drama.genres) ? drama.genres : drama.genres ? String(drama.genres).split(',').map((g) => g.trim()) : [];
+  const cast: string[] = drama.cast_list ? drama.cast_list.split(',').map((a: string) => a.trim()).filter(Boolean) : [];
+  const image = drama.backdrop_url || drama.poster_url;
+
+  // Answer-first summary: the exact sentence AI assistants & Google featured snippets like to quote
+  const summary = `${baseTitle}${drama.release_year ? ` (${drama.release_year})` : ''} is a ${country ? `${country} ` : ''}${typeLabel.toLowerCase().includes('drama') ? typeLabel : `${typeLabel} series`}${genres.length ? ` (${genres.slice(0, 3).join(', ')})` : ''} available on CKDub in ${audio}. ${epCount > 0 ? `${epCount} episode${epCount > 1 ? 's are' : ' is'} available to watch${drama.total_episodes && drama.total_episodes > epCount ? ` out of ${drama.total_episodes}` : ''}` : 'Episodes will be added soon'}${drama.status ? ` and the series is ${drama.status.toLowerCase()}` : ''}.${cast.length ? ` It stars ${cast.slice(0, 3).join(', ')}.` : ''}`;
+
+  const faqs = [
+    {
+      q: `Where can I watch ${baseTitle} in ${audio.replace(' Dubbed', '')}?`,
+      a: `You can watch ${baseTitle} ${audio} on CKDub (www.ckdub.com). Open the episode list on this page and tap any episode to start watching — no sign-up needed.`,
+    },
+    {
+      q: `How many episodes does ${baseTitle} have?`,
+      a: drama.total_episodes
+        ? `${baseTitle} has ${drama.total_episodes} episodes in total. ${epCount} ${epCount === 1 ? 'is' : 'are'} currently available in ${audio} on CKDub.`
+        : `${epCount} episode${epCount === 1 ? ' is' : 's are'} currently available in ${audio} on CKDub.`,
+    },
+    {
+      q: `Is ${baseTitle} completed or ongoing?`,
+      a: drama.status === 'Completed'
+        ? `${baseTitle} is completed. All available episodes are listed on this page.`
+        : `${baseTitle} is ongoing. New ${audio} episodes are added on CKDub as they release${drama.episode_schedule_note ? ` — ${drama.episode_schedule_note}` : ''}.`,
+    },
+    ...(lastUpdated
+      ? [{ q: `When was the latest episode of ${baseTitle} added?`, a: `The latest episode (Episode ${latestEpisode.episode_number}) was added on ${new Date(lastUpdated).toDateString().slice(4)}.` }]
+      : []),
+    ...(cast.length ? [{ q: `Who is in the cast of ${baseTitle}?`, a: `The main cast of ${baseTitle} includes ${cast.slice(0, 6).join(', ')}.` }] : []),
+  ];
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'TVSeries',
+        '@id': `${url}#series`,
+        name: baseTitle,
+        alternateName: drama.alt_titles ? drama.alt_titles.split(',').map((t: string) => t.trim()) : undefined,
+        url,
+        description: stripText(drama.description || drama.short_description, 500),
+        image: image || undefined,
+        thumbnailUrl: drama.poster_url || image || undefined,
+        genre: genres.length ? genres : undefined,
+        inLanguage: audioLangCode(drama.language),
+        countryOfOrigin: country ? { '@type': 'Country', name: country } : undefined,
+        startDate: drama.release_year ? `${drama.release_year}` : undefined,
+        numberOfEpisodes: totalEps || undefined,
+        numberOfSeasons: 1,
+        contentRating: drama.content_rating || undefined,
+        productionCompany: drama.network ? { '@type': 'Organization', name: drama.network } : undefined,
+        actor: cast.length ? cast.map((name) => ({ '@type': 'Person', name })) : undefined,
+        dateModified: drama.updated_at || lastUpdated || undefined,
+        episode: episodes.map((ep: any) => ({
+          '@type': 'TVEpisode',
+          episodeNumber: ep.episode_number,
+          name: `${baseTitle} Episode ${ep.episode_number} ${audio}`,
+          url: `${url}/watch/${ep.episode_number}`,
+          datePublished: ep.created_at,
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+          ...(drama.category ? [{ '@type': 'ListItem', position: 2, name: typeLabel, item: `${SITE_URL}/category/${drama.category}` }] : [{ '@type': 'ListItem', position: 2, name: 'Browse', item: `${SITE_URL}/browse` }]),
+          { '@type': 'ListItem', position: 3, name: baseTitle, item: url },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+      },
+    ],
   };
 
   return (
     <main className="min-h-screen bg-[#0D0E10] text-white pt-28">
       <ViewTracker slug={params.slug} />
-      {/* Schema.org JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
 
       {/* Cinematic Hero */}
       <section className="relative min-h-[70vh] w-full flex items-end pt-32 pb-16">
-        {/* Background Poster/Backdrop */}
         <div className="absolute inset-0 z-0">
-          {(drama.backdrop_url || drama.poster_url) ? (
+          {image ? (
             <Image
-              src={drama.backdrop_url || drama.poster_url}
-              alt={drama.title}
+              src={image}
+              alt={`${baseTitle} ${audio} poster`}
               fill
               className="object-cover opacity-70 object-top"
               priority
+              sizes="100vw"
             />
           ) : (
             <div className="w-full h-full bg-[#141519]" />
           )}
-          {/* Gradients */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0D0E10] via-[#0D0E10]/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0D0E10] via-[#0D0E10]/40 to-transparent" />
         </div>
 
-        {/* Hero Content */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl w-full">
             {/* Breadcrumbs */}
-            <div className="text-[#92949A] text-sm mb-4 flex items-center gap-2">
+            <nav aria-label="Breadcrumb" className="text-[#92949A] text-sm mb-4 flex items-center gap-2">
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/browse" className="hover:text-white transition-colors">Browse</Link>
+              {drama.category ? (
+                <Link href={`/category/${drama.category}`} className="hover:text-white transition-colors">{typeLabel}</Link>
+              ) : (
+                <Link href="/browse" className="hover:text-white transition-colors">Browse</Link>
+              )}
               <span>/</span>
-              <span className="text-white line-clamp-1">{drama.title}</span>
-            </div>
+              <span className="text-white line-clamp-1">{baseTitle}</span>
+            </nav>
 
-            {/* Title */}
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-black mb-4 leading-[1.1] drop-shadow-lg text-white">
               {drama.title}
             </h1>
-            
+
             {/* Metadata Line */}
             <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm font-bold mb-6 text-[#92949A] uppercase tracking-wider">
               {drama.category && (
                 <span className="text-primary bg-primary/10 px-3 py-1 rounded font-bold">
-                  {drama.category === 'korean' ? 'K-Drama' : drama.category === 'chinese' ? 'C-Drama' : drama.category === 'ai_series' ? 'AI Original ✨' : drama.category}
+                  {drama.category === 'ai_series' ? 'AI Original ✨' : typeLabel}
                 </span>
               )}
-              <span>{drama.release_year || new Date().getFullYear()}</span>
+              {drama.release_year && <span>{drama.release_year}</span>}
+              {country && (<><span>•</span><span>{country}</span></>)}
               <span>•</span>
-              <span>{drama.category || 'Korean Drama'}</span>
+              <span>{totalEps} Episodes</span>
               <span>•</span>
-              <span>{drama.total_episodes ? `${drama.total_episodes} Episodes` : `${episodes.length} Episodes`}</span>
-              <span>•</span>
-              <span className="text-white">Hindi Dubbed</span>
-              
+              <span className="text-white">{audio}</span>
               {drama.content_rating && (
                 <>
                   <span>•</span>
@@ -155,12 +232,10 @@ export default async function DramaDetail({ params }: { params: { slug: string }
               )}
             </div>
 
-            {/* Short Description */}
             <p className="text-[#F5F5F3] text-lg max-w-3xl mb-10 line-clamp-3 md:line-clamp-none drop-shadow-md leading-relaxed">
               {drama.short_description || drama.description}
             </p>
 
-            {/* Action Buttons */}
             <div className="flex items-center gap-4">
               <a
                 href="#episodes"
@@ -176,90 +251,63 @@ export default async function DramaDetail({ params }: { params: { slug: string }
         </div>
       </section>
 
-      {/* Main Content Area: Synopsis & Info */}
+      {/* Synopsis & Info */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-white/5 flex flex-col lg:flex-row gap-12">
         <div className="flex-1">
-          <h2 className="text-2xl font-bold mb-4">Synopsis</h2>
+          {/* Quick answer (AEO / GEO) */}
+          <div className="mb-8 bg-[#141519] border-l-4 border-primary rounded-r-xl p-5">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-2">Quick Facts</h2>
+            <p className="text-[#E5E5E3] leading-relaxed">{summary}</p>
+          </div>
+
+          <h2 className="text-2xl font-bold mb-4">{baseTitle} Synopsis</h2>
           <div className="text-[#92949A] leading-relaxed text-lg">
-            {(drama.description || "No synopsis available.").split('\n').map((paragraph: string, idx: number) => (
+            {(drama.description || "No synopsis available.").split('\n').filter(Boolean).map((paragraph: string, idx: number) => (
               <p key={idx} className="mb-4">{paragraph}</p>
             ))}
           </div>
         </div>
 
-        {/* Right Column: Ads & Series Info */}
-        <div className="w-full lg:w-96 shrink-0 space-y-6">
-
-          {/* AI / Entity SEO Fact Block - Moved here */}
+        <aside className="w-full lg:w-96 shrink-0 space-y-6">
           <div className="text-sm text-[#92949A] bg-[#141519] p-6 rounded-2xl border border-white/5 shadow-lg">
-            <h3 className="text-white font-bold mb-4 border-b border-white/10 pb-2">Series Information</h3>
-            <div className="space-y-3">
-              <div>
-                <span className="font-semibold text-white mr-2">Original Title:</span>
-                <span>{drama.alt_titles?.split(',')[1]?.trim() || drama.title}</span>
-              </div>
-              {drama.alt_titles && (
-                <div>
-                  <span className="font-semibold text-white mr-2">Also Known As:</span>
-                  <span>{drama.alt_titles}</span>
-                </div>
-              )}
-              {drama.country && (
-                <div>
-                  <span className="font-semibold text-white mr-2">Country:</span>
-                  <span>{drama.country}</span>
-                </div>
-              )}
-              <div>
-                <span className="font-semibold text-white mr-2">Language:</span>
-                <span>{drama.language || 'Hindi Dub'}</span>
-              </div>
-              {drama.network && (
-                <div>
-                  <span className="font-semibold text-white mr-2">Network:</span>
-                  <span>{drama.network}</span>
-                </div>
-              )}
-              <div>
-                <span className="font-semibold text-white mr-2">Release Year:</span>
-                <span>{drama.release_year}</span>
-              </div>
-              <div>
-                <span className="font-semibold text-white mr-2">Status:</span>
-                <span>{drama.status}</span>
-              </div>
-              <div>
-                <span className="font-semibold text-white mr-2">Episodes:</span>
-                <span>{drama.total_episodes || episodes.length}</span>
-              </div>
-              <div>
-                <span className="font-semibold text-white mr-2">Genres:</span>
-                <span>{Array.isArray(drama.genres) ? drama.genres.join(', ') : drama.genres}</span>
-              </div>
-              {drama.cast_list && (
-                <div>
-                  <span className="font-semibold text-white mr-2">Main Cast:</span>
-                  <span>{drama.cast_list}</span>
-                </div>
-              )}
-            </div>
+            <h2 className="text-white font-bold mb-4 border-b border-white/10 pb-2">Series Information</h2>
+            <dl className="space-y-3">
+              {[
+                ['Title', baseTitle],
+                ['Also Known As', drama.alt_titles],
+                ['Type', typeLabel],
+                ['Country', country],
+                ['Audio', audio],
+                ['Network', drama.network],
+                ['Release Year', drama.release_year],
+                ['Status', drama.status],
+                ['Episodes', totalEps ? `${epCount}${drama.total_episodes && drama.total_episodes > epCount ? ` of ${drama.total_episodes}` : ''}` : null],
+                ['Genres', genres.join(', ')],
+                ['Main Cast', cast.join(', ')],
+              ]
+                .filter(([, v]) => v)
+                .map(([k, v]) => (
+                  <div key={k as string}>
+                    <dt className="inline font-semibold text-white mr-2">{k}:</dt>
+                    <dd className="inline">{v}</dd>
+                  </div>
+                ))}
+            </dl>
           </div>
-        </div>
+        </aside>
       </section>
 
-      {/* Episodes Section */}
+      {/* Episodes */}
       <section id="episodes" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 scroll-mt-24">
         <div className="flex justify-between items-end mb-8 border-b border-white/10 pb-4">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold">Episodes</h2>
-            <span className="bg-[#1C1D22] px-3 py-1 rounded text-sm font-medium border border-white/10">
-              S1
-            </span>
+            <h2 className="text-2xl md:text-3xl font-bold">{baseTitle} Episodes</h2>
+            <span className="bg-[#1C1D22] px-3 py-1 rounded text-sm font-medium border border-white/10">S1</span>
           </div>
           {lastUpdated && (
             <div className="text-[#92949A] text-sm flex items-center gap-2">
               <span className="hidden sm:inline">Updated:</span>
-              <span>{timeAgo(lastUpdated)}</span>
+              <time dateTime={lastUpdated}>{timeAgo(lastUpdated)}</time>
             </div>
           )}
         </div>
@@ -271,21 +319,19 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                 key={ep.id || ep.episode_number}
                 episodeNumber={ep.episode_number}
                 dramaSlug={params.slug}
-                  videoUrl={ep.terabox_url}
-                  category={drama.category}
+                videoUrl={ep.terabox_url}
+                category={drama.category}
               />
             ))}
           </div>
         ) : (
           <div className="bg-[#141519] border border-white/5 rounded-lg p-12 text-center text-[#92949A]">
-            <svg className="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 4v16M17 4v16M3 8h18M3 16h18"/></svg>
             <p className="text-lg">No episodes available yet.</p>
             <p className="text-sm mt-2">Check back later for updates.</p>
           </div>
         )}
       </section>
 
-      {/* Episode Schedule Note - Only shown if present */}
       {drama.episode_schedule_note && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
           <div className="bg-gradient-to-r from-[#141519] to-[#1C1D22] border border-white/5 rounded-2xl p-6 flex items-start gap-4">
@@ -300,13 +346,12 @@ export default async function DramaDetail({ params }: { params: { slug: string }
         </section>
       )}
 
-      {/* Referral / Earning Link - Only shown if present */}
       {drama.referral_link && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-          <a 
+          <a
             href={drama.referral_link}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener noreferrer sponsored"
             className="block bg-gradient-to-r from-emerald-900/30 to-emerald-800/20 border border-emerald-500/20 rounded-2xl p-6 hover:border-emerald-500/40 transition-all group"
           >
             <div className="flex items-center justify-between">
@@ -316,7 +361,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                 </div>
                 <div>
                   <h3 className="text-emerald-300 font-bold text-lg">Wanna Start Earning?</h3>
-                  <p className="text-[#92949A] text-sm">Join TeraBox and start earning rewards today — it's free!</p>
+                  <p className="text-[#92949A] text-sm">Join TeraBox and start earning rewards today — it&apos;s free!</p>
                 </div>
               </div>
               <svg className="w-6 h-6 text-emerald-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
@@ -325,10 +370,25 @@ export default async function DramaDetail({ params }: { params: { slug: string }
         </section>
       )}
 
-      {/* You May Also Like */}
+      {/* FAQ (visible — required for FAQ rich results & loved by AI answer engines) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <h2 className="text-2xl font-black text-white mb-6">{baseTitle} — Frequently Asked Questions</h2>
+        <div className="space-y-3">
+          {faqs.map((f) => (
+            <details key={f.q} className="group bg-[#141519] border border-white/5 rounded-xl p-5 open:border-white/10">
+              <summary className="cursor-pointer list-none flex items-center justify-between gap-4 font-semibold text-white">
+                <h3 className="text-base">{f.q}</h3>
+                <span className="text-primary text-xl transition-transform group-open:rotate-45">+</span>
+              </summary>
+              <p className="mt-3 text-[#92949A] leading-relaxed">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       {relatedDramas && relatedDramas.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-          <h2 className="text-2xl font-black text-white mb-6">You May Also Like</h2>
+          <h2 className="text-2xl font-black text-white mb-6">More {typeLabel}s You May Like</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {relatedDramas.map((rel: any) => {
               const relEpCount = rel.episodes?.length || 0;
@@ -338,9 +398,7 @@ export default async function DramaDetail({ params }: { params: { slug: string }
                     {rel.backdrop_url || rel.poster_url ? (
                       <Image src={rel.backdrop_url || rel.poster_url} alt={rel.title} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw" />
                     ) : (
-                      <div className="w-full h-full bg-[#1C1D22] flex items-center justify-center text-white/10">
-                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M15 10l4.553-2.069A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" /></svg>
-                      </div>
+                      <div className="w-full h-full bg-[#1C1D22]" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
                     {relEpCount > 0 && (
@@ -364,8 +422,3 @@ export default async function DramaDetail({ params }: { params: { slug: string }
     </main>
   );
 }
-
-
-
-
-

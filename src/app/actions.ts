@@ -3,7 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getServiceSupabase } from "@/lib/supabase";
-import ImageKit from "imagekit";
+import { uploadImage, deleteImageByUrl } from "@/lib/imagekit";
+
+/** Refresh every public page (home, browse, drama, watch, sitemap, llms.txt) after content changes. */
+function refreshPublicSite() {
+  revalidatePath("/", "layout");
+}
+
+/** Mark a drama as recently updated so it jumps to the top of the homepage. */
+async function touchDrama(supabase: any, dramaId: string, episodeNumber?: number) {
+  const { data: drama } = await supabase.from("dramas").select("total_episodes").eq("id", dramaId).single();
+  const update: Record<string, any> = { updated_at: new Date().toISOString() };
+  if (episodeNumber && (!drama?.total_episodes || drama.total_episodes < episodeNumber)) {
+    update.total_episodes = episodeNumber;
+  }
+  await supabase.from("dramas").update(update).eq("id", dramaId);
+}
 
 export async function createDrama(formData: FormData) {
   const supabase = createClient();
@@ -45,37 +60,12 @@ export async function createDrama(formData: FormData) {
   const posterFile = formData.get("poster_file") as File;
   const backdropFile = formData.get("backdrop_file") as File;
 
-  // 2. Upload to ImageKit
-  if ((posterFile && posterFile.size > 0) || (backdropFile && backdropFile.size > 0)) {
-    if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
-      throw new Error("ImageKit credentials are missing in .env.local");
-    }
-    
-    const imagekit = new ImageKit({
-        publicKey : process.env.IMAGEKIT_PUBLIC_KEY,
-        privateKey : process.env.IMAGEKIT_PRIVATE_KEY,
-        urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT
-    });
-
-    if (posterFile && posterFile.size > 0) {
-      const buffer = Buffer.from(await posterFile.arrayBuffer());
-      const uploadResponse = await imagekit.upload({
-        file: buffer,
-        fileName: `${slug}-poster`,
-        folder: "/ckdub/posters"
-      });
-      poster_url = uploadResponse.url;
-    }
-
-    if (backdropFile && backdropFile.size > 0) {
-      const buffer = Buffer.from(await backdropFile.arrayBuffer());
-      const uploadResponse = await imagekit.upload({
-        file: buffer,
-        fileName: `${slug}-backdrop`,
-        folder: "/ckdub/backdrops"
-      });
-      backdrop_url = uploadResponse.url;
-    }
+  // 2. Upload to ImageKit (original quality kept; CDN resizes per device)
+  if (posterFile && posterFile.size > 0) {
+    poster_url = await uploadImage(posterFile, `${slug}-poster`, "/ckdub/posters");
+  }
+  if (backdropFile && backdropFile.size > 0) {
+    backdrop_url = await uploadImage(backdropFile, `${slug}-backdrop`, "/ckdub/backdrops");
   }
 
   // 3. Save to Supabase
@@ -94,8 +84,7 @@ export async function createDrama(formData: FormData) {
     throw new Error("Failed to create drama: " + error.message);
   }
 
-  revalidatePath("/");
-  revalidatePath("/ishuzubi");
+  refreshPublicSite();
 }
 
 export async function addEpisode(formData: FormData) {
@@ -130,9 +119,8 @@ export async function addEpisode(formData: FormData) {
     throw new Error("Failed to add episode");
   }
 
-  revalidatePath("/");
-  revalidatePath("/ishuzubi");
-  revalidatePath("/ishuzubi/dramas");
+  await touchDrama(supabase, drama_id, episode_number);
+  refreshPublicSite();
 }
 
 export async function updateEpisode(formData: FormData) {
@@ -162,9 +150,7 @@ export async function updateEpisode(formData: FormData) {
 
   if (error) throw new Error("Failed to update episode: " + error.message);
 
-  revalidatePath("/");
-  revalidatePath("/ishuzubi");
-  revalidatePath("/ishuzubi/dramas");
+  refreshPublicSite();
 }
 
 export async function submitRequest(formData: FormData) {
@@ -197,14 +183,19 @@ export async function deleteDrama(formData: FormData) {
   }
   
   const drama_id = formData.get('drama_id') as string;
+  const { data: existing } = await supabase.from('dramas').select('poster_url, backdrop_url').eq('id', drama_id).single();
   
   // Delete episodes first
   await supabase.from('episodes').delete().eq('drama_id', drama_id);
   const { error } = await supabase.from('dramas').delete().eq('id', drama_id);
   
   if (error) throw new Error('Failed to delete drama');
-  revalidatePath('/');
-  revalidatePath('/ishuzubi');
+
+  // Clean up the drama's images from ImageKit
+  await deleteImageByUrl(existing?.poster_url);
+  await deleteImageByUrl(existing?.backdrop_url);
+
+  refreshPublicSite();
 }
 
 export async function deleteEpisode(formData: FormData) {
@@ -218,8 +209,7 @@ export async function deleteEpisode(formData: FormData) {
   const { error } = await supabase.from('episodes').delete().eq('id', episode_id);
   
   if (error) throw new Error('Failed to delete episode');
-  revalidatePath('/');
-  revalidatePath('/ishuzubi');
+  refreshPublicSite();
 }
 
 export async function updateRequestStatus(formData: FormData) {
@@ -270,39 +260,19 @@ export async function updateDrama(formData: FormData) {
   const genres = formData.get("genres") as string;
   const genresArray = genres ? genres.split(",").map(g => g.trim()) : null;
 
-  let poster_url = formData.get("existing_poster") as string;
-  let backdrop_url = formData.get("existing_backdrop") as string;
+  const old_poster = formData.get("existing_poster") as string;
+  const old_backdrop = formData.get("existing_backdrop") as string;
+  let poster_url = old_poster;
+  let backdrop_url = old_backdrop;
 
   const posterFile = formData.get("poster_file") as File;
   const backdropFile = formData.get("backdrop_file") as File;
 
-  if ((posterFile && posterFile.size > 0) || (backdropFile && backdropFile.size > 0)) {
-    const ImageKit = (await import("imagekit")).default;
-    const imagekit = new ImageKit({
-        publicKey : process.env.IMAGEKIT_PUBLIC_KEY!,
-        privateKey : process.env.IMAGEKIT_PRIVATE_KEY!,
-        urlEndpoint : process.env.IMAGEKIT_URL_ENDPOINT!
-    });
-
-    if (posterFile && posterFile.size > 0) {
-      const buffer = Buffer.from(await posterFile.arrayBuffer());
-      const uploadResponse = await imagekit.upload({
-        file: buffer,
-        fileName: `${slug}-poster`,
-        folder: "/ckdub/posters"
-      });
-      poster_url = uploadResponse.url;
-    }
-
-    if (backdropFile && backdropFile.size > 0) {
-      const buffer = Buffer.from(await backdropFile.arrayBuffer());
-      const uploadResponse = await imagekit.upload({
-        file: buffer,
-        fileName: `${slug}-backdrop`,
-        folder: "/ckdub/backdrops"
-      });
-      backdrop_url = uploadResponse.url;
-    }
+  if (posterFile && posterFile.size > 0) {
+    poster_url = await uploadImage(posterFile, `${slug}-poster`, "/ckdub/posters");
+  }
+  if (backdropFile && backdropFile.size > 0) {
+    backdrop_url = await uploadImage(backdropFile, `${slug}-backdrop`, "/ckdub/backdrops");
   }
 
   const { error } = await supabase
@@ -316,12 +286,18 @@ export async function updateDrama(formData: FormData) {
     })
     .eq("id", id);
 
-  if (error) throw new Error("Failed to update drama: " + error.message);
+  if (error) {
+    // Save failed: remove the freshly uploaded files so nothing is orphaned
+    if (poster_url !== old_poster) await deleteImageByUrl(poster_url);
+    if (backdrop_url !== old_backdrop) await deleteImageByUrl(backdrop_url);
+    throw new Error("Failed to update drama: " + error.message);
+  }
 
-  revalidatePath("/");
-  revalidatePath("/ishuzubi");
-  revalidatePath("/ishuzubi/dramas");
-  revalidatePath(`/drama/${slug}`);
+  // Save succeeded: permanently delete the replaced images from ImageKit
+  if (poster_url !== old_poster) await deleteImageByUrl(old_poster);
+  if (backdrop_url !== old_backdrop) await deleteImageByUrl(old_backdrop);
+
+  refreshPublicSite();
 }
 
 export async function submitComment(formData: FormData) {
@@ -377,7 +353,6 @@ export async function toggleFeatured(dramaId: string, featured: boolean) {
   }
   const { error } = await supabase.from('dramas').update({ is_featured: featured }).eq('id', dramaId);
   if (error) throw new Error('Failed to update featured status');
-  revalidatePath('/');
-  revalidatePath('/ishuzubi');
+  refreshPublicSite();
 }
 

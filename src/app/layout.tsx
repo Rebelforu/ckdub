@@ -1,31 +1,50 @@
-﻿import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import AdScripts from '@/components/AdScripts';
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import ScrollToTop from "@/components/ScrollToTop";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/site";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+
+export const viewport: Viewport = {
+  themeColor: "#0D0E10",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ckdub.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "CKDub Ã¢â‚¬â€ Stream Korean, Chinese & Asian Dramas Dubbed in Hindi & English",
+    default: "CKDub - Watch Korean & Chinese Dramas in Hindi Dubbed Online Free",
     template: "%s | CKDub",
   },
-  description: "Watch the best Korean Dramas, Chinese Dramas, and Thai series dubbed in high-quality Hindi and English audio. Free streaming, updated daily.",
-  keywords: ["Korean Drama Hindi Dubbed", "K-Drama Hindi", "C-Drama Hindi", "Asian Drama Dubbed", "Watch Korean Drama Online", "CKDub", "Hindi Dubbed Drama", "Korean Series Hindi"],
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "Korean drama in Hindi", "Korean drama Hindi dubbed", "K-Drama Hindi dubbed", "Chinese drama Hindi dubbed",
+    "C-Drama in Hindi", "Hindi dubbed drama", "Asian drama Hindi", "Korean series in Hindi",
+    "Korean drama English dubbed", "watch Korean drama online free", "CKDub",
+  ],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "entertainment",
+  alternates: { canonical: "/" },
+  formatDetection: { telephone: false, email: false, address: false },
   openGraph: {
     type: "website",
-    siteName: "CKDub",
-    title: "CKDub Ã¢â‚¬â€ The Ultimate Asian Drama Streaming Experience",
-    description: "Stream premium Korean, Chinese, and Thai series dubbed in Hindi and English. Updated daily with new episodes.",
-    locale: "en_US",
+    siteName: SITE_NAME,
+    url: SITE_URL,
+    title: "CKDub - Korean & Chinese Dramas in Hindi Dubbed",
+    description: SITE_DESCRIPTION,
+    locale: "en_IN",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CKDub Ã¢â‚¬â€ Stream Asian Dramas Dubbed in Hindi & English",
-    description: "Your premium destination for dubbed Asian dramas.",
+    title: "CKDub - Korean & Chinese Dramas in Hindi Dubbed",
+    description: SITE_DESCRIPTION,
   },
   robots: {
     index: true,
@@ -38,10 +57,38 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {},
   other: {
-    "google-adsense-account": "ca-pub-9035042995715249"
-  }
+    "google-adsense-account": "ca-pub-9035042995715249",
+  },
+};
+
+const siteSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/icon` },
+      description: SITE_DESCRIPTION,
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: SITE_NAME,
+      alternateName: ["CK Dub", "ckdub.com"],
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      inLanguage: ["en", "hi"],
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/browse?q={search_term_string}` },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -52,97 +99,33 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-7FZTPHXFJH"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){window.dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-7FZTPHXFJH');
-          `}
-        </Script>
+        {/* Speed up image + ads connections */}
+        <link rel="preconnect" href="https://ik.imagekit.io" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://ik.imagekit.io" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly site summary" />
 
-        <AdScripts />
-
-        {/* JSON-LD Organization Schema */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "CKDub",
-              "url": "https://ckdub.com",
-              "description": "Stream premium Korean, Chinese, and Thai series dubbed in Hindi and English.",
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://ckdub.com/browse?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-              }
-            })
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteSchema) }}
         />
       </head>
       <body className={`${inter.variable} font-sans bg-background text-textMain min-h-screen antialiased selection:bg-primary/30 selection:text-white`}>
-        
-        {/* Screen Recording Deterrent Watermark */}
-        <div className="watermark-overlay" aria-hidden="true" />
-        
         {children}
 
-        {/* === PRODUCTION SECURITY SCRIPTS === */}
-        
-        {/* Console Suppression */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(){
-                if(location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'){
-                  var n=function(){};
-                  window.console.log=n;
-                  window.console.warn=n;
-                  window.console.info=n;
-                  window.console.debug=n;
-                  window.console.table=n;
-                  window.console.dir=n;
-                  window.console.dirxml=n;
-                  window.console.group=n;
-                  window.console.groupEnd=n;
-                  window.console.time=n;
-                  window.console.timeEnd=n;
-                  window.console.trace=n;
-                  window.console.count=n;
-                }
-              })();
-            `
-          }}
-        />
+        {/* Analytics + ads load after the page is interactive so they never slow down first paint */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-7FZTPHXFJH" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7FZTPHXFJH');`}
+        </Script>
+        <AdScripts />
 
-        {/* Right-Click & Key Shortcut Disable */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(){
-                if(location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
-                document.addEventListener('contextmenu',function(e){e.preventDefault();});
-                document.addEventListener('keydown',function(e){
-                  if(e.key==='F12') e.preventDefault();
-                  if(e.ctrlKey && e.shiftKey && (e.key==='I'||e.key==='J'||e.key==='C')) e.preventDefault();
-                  if(e.ctrlKey && e.key==='u') e.preventDefault();
-                  if(e.ctrlKey && e.key==='s') e.preventDefault();
-                });
-              })();
-            `
-          }}
-        />
+        {/* Right-click & save/inspect shortcut deterrent (production only) */}
+        <Script id="content-protect" strategy="lazyOnload">
+          {`(function(){if(location.hostname==='localhost'||location.hostname==='127.0.0.1')return;document.addEventListener('contextmenu',function(e){e.preventDefault();});document.addEventListener('keydown',function(e){if(e.key==='F12')e.preventDefault();if(e.ctrlKey&&e.shiftKey&&(e.key==='I'||e.key==='J'||e.key==='C'))e.preventDefault();if(e.ctrlKey&&(e.key==='u'||e.key==='s'))e.preventDefault();});})();`}
+        </Script>
         <ScrollToTop />
-      </body></html>
+      </body>
+    </html>
   );
 }
-
-
-
