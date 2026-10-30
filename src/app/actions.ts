@@ -4,20 +4,25 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getServiceSupabase } from "@/lib/supabase";
 import { uploadImage, deleteImageByUrl } from "@/lib/imagekit";
+import { submitToIndexNow } from "@/lib/indexnow";
 
-/** Refresh every public page (home, browse, drama, watch, sitemap, llms.txt) after content changes. */
-function refreshPublicSite() {
+/** Refresh every public page (home, browse, drama, watch, sitemap, llms.txt) after content changes and notify IndexNow. */
+function refreshPublicSite(urls?: string[]) {
   revalidatePath("/", "layout");
+  if (urls && urls.length > 0) {
+    submitToIndexNow(urls).catch(() => {});
+  }
 }
 
 /** Mark a drama as recently updated so it jumps to the top of the homepage. */
 async function touchDrama(supabase: any, dramaId: string, episodeNumber?: number) {
-  const { data: drama } = await supabase.from("dramas").select("total_episodes").eq("id", dramaId).single();
+  const { data: drama } = await supabase.from("dramas").select("slug, total_episodes").eq("id", dramaId).single();
   const update: Record<string, any> = { updated_at: new Date().toISOString() };
   if (episodeNumber && (!drama?.total_episodes || drama.total_episodes < episodeNumber)) {
     update.total_episodes = episodeNumber;
   }
   await supabase.from("dramas").update(update).eq("id", dramaId);
+  return drama?.slug as string | undefined;
 }
 
 export async function createDrama(formData: FormData) {
@@ -84,7 +89,7 @@ export async function createDrama(formData: FormData) {
     throw new Error("Failed to create drama: " + error.message);
   }
 
-  refreshPublicSite();
+  refreshPublicSite([`/drama/${slug}`, `/category/${category}`, '/']);
 }
 
 export async function addEpisode(formData: FormData) {
@@ -125,8 +130,8 @@ export async function addEpisode(formData: FormData) {
     throw new Error("Failed to add episode");
   }
 
-  await touchDrama(supabase, drama_id, episode_number);
-  refreshPublicSite();
+  const slug = await touchDrama(supabase, drama_id, episode_number);
+  refreshPublicSite(slug ? [`/drama/${slug}/watch/${episode_number}`, `/drama/${slug}`, '/'] : ['/']);
 }
 
 export async function updateEpisode(formData: FormData) {

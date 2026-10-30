@@ -24,8 +24,11 @@ export const metadata: Metadata = {
   applicationName: SITE_NAME,
   keywords: [
     "Korean drama in Hindi", "Korean drama Hindi dubbed", "K-Drama Hindi dubbed", "Chinese drama Hindi dubbed",
-    "C-Drama in Hindi", "Hindi dubbed drama", "Asian drama Hindi", "Korean series in Hindi",
-    "Korean drama English dubbed", "watch Korean drama online free", "CKDub",
+    "chinese drama in hindi dubbed", "kdrama hindi dubbed", "cdrama hindi dubbed", "china drama hindi dubbed",
+    "best korean drama in hindi dubbed", "best chinese drama in hindi dubbed", "c drama in hindi dubbed",
+    "C-Drama in Hindi", "Hindi dubbed drama", "Asian drama Hindi", "Korean series in Hindi", "korean series hindi dubbed",
+    "Korean drama English dubbed", "watch Korean drama online free", "free website to watch korean drama in hindi",
+    "CKDub", "ckdub.com",
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,

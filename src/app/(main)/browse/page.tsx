@@ -1,11 +1,23 @@
-﻿import Image from 'next/image';
+import Image from 'next/image';
 import Link from 'next/link';
 import { getServiceSupabase } from '@/lib/supabase';
 import { Metadata } from 'next';
+import { SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'Browse All Dramas | CKDub',
-  description: 'Browse our complete collection of Korean and Chinese dramas dubbed in Hindi and English.',
+  title: 'Browse Korean & Chinese Dramas in Hindi Dubbed - Free HD | CKDub',
+  description: 'Browse, watch and download all Korean dramas (K-Dramas) and Chinese dramas (C-Dramas) dubbed in Hindi online free in HD. Filter by category, ongoing, and completed series on CKDub.',
+  keywords: [
+    'browse kdrama hindi dubbed',
+    'browse cdrama hindi dubbed',
+    'korean drama hindi dubbed list',
+    'chinese drama hindi dubbed list',
+    'all k drama hindi dubbed',
+    'all chinese drama hindi dubbed',
+    'korean series in hindi dubbed',
+    'free website to watch korean drama in hindi',
+  ],
+  alternates: { canonical: `${SITE_URL}/browse` },
 };
 
 export default async function BrowsePage({

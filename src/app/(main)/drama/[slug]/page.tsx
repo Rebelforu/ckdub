@@ -25,26 +25,52 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const eps = drama.episodes?.length || 0;
   // Avoid "X Hindi Dubbed - Hindi Dubbed" when the admin title already contains it
   const baseTitle = drama.title.replace(/\s*(hindi|english)\s*dubbed\s*$/i, '').trim();
-  const seoTitle = `${baseTitle}${drama.release_year ? ` (${drama.release_year})` : ''} ${audio} - All Episodes`;
+  const typeLabel = categoryLabel(drama.category);
+  const url = `${SITE_URL}/drama/${params.slug}`;
+
+  // High-CTR title targeting exact search phrases from Google & Bing
+  const seoTitle = `${baseTitle} Hindi Dubbed (All Episodes) - Watch Online & Download Free HD`;
   const seoDescription = stripText(
     drama.meta_description ||
-      `Watch ${baseTitle} ${audio} online. ${eps ? `${eps} episodes available` : 'Episodes'}${drama.status ? ` (${drama.status})` : ''}. ${drama.short_description || drama.description || ''}`,
+      `Watch and download ${baseTitle} in Hindi dubbed all episodes online free in 720p/1080p HD. Stream ${eps ? `${eps} episodes` : 'all episodes'}${drama.status ? ` (${drama.status})` : ''} in Hindi audio with English subtitles on CKDub. Fast streaming & direct download links.`,
     160
   );
   const image = drama.backdrop_url || drama.poster_url;
-  const url = `${SITE_URL}/drama/${params.slug}`;
+
+  const altTitles = drama.alt_titles ? drama.alt_titles.split(',').map((t: string) => t.trim()) : [];
+  const baseNoSpaces = baseTitle.replace(/\s+/g, '');
 
   return {
     title: seoTitle,
     description: seoDescription,
     keywords: [
-      `${baseTitle} ${audio}`, `${baseTitle} in Hindi`, `${baseTitle} all episodes`, `${baseTitle} watch online`,
-      `${baseTitle} episode 1`, `${categoryLabel(drama.category)} ${audio}`,
-      ...(drama.alt_titles ? drama.alt_titles.split(',').map((t: string) => t.trim()) : []),
+      `${baseTitle} ${audio}`,
+      `${baseTitle} in Hindi`,
+      `${baseTitle} Hindi dubbed`,
+      `${baseTitle} [hindi]`,
+      `${baseTitle} all episodes in Hindi`,
+      `${baseTitle} in Hindi dubbed all episodes`,
+      `${baseTitle} watch online in Hindi`,
+      `${baseTitle} Hindi dubbed download`,
+      `${baseTitle} in Hindi download`,
+      `${baseTitle} full drama Hindi dubbed`,
+      `is ${baseTitle} available in Hindi`,
+      `where to watch ${baseTitle} in Hindi`,
+      `where can i watch ${baseTitle} in Hindi`,
+      `${baseTitle} episode 1 in Hindi`,
+      `${baseTitle} ep 1 in Hindi`,
+      `${baseTitle} HD watch online`,
+      `${typeLabel} in Hindi dubbed`,
+      `${typeLabel} Hindi dubbed`,
+      `${baseTitle} free download`,
+      ...altTitles,
+      baseNoSpaces,
+      `${baseNoSpaces} in hindi`,
+      `${baseNoSpaces} hindi dubbed`,
     ],
     alternates: { canonical: url },
     openGraph: {
-      title: seoTitle,
+      title: `${baseTitle} Hindi Dubbed - Watch Online & Download Free HD | CKDub`,
       description: seoDescription,
       url,
       type: 'video.tv_show',
@@ -102,20 +128,32 @@ export default async function DramaDetail({ params }: { params: { slug: string }
 
   const faqs = [
     {
-      q: `Where can I watch ${baseTitle} in ${audio.replace(' Dubbed', '')}?`,
-      a: `You can watch ${baseTitle} ${audio} on CKDub (www.ckdub.com). Open the episode list on this page and tap any episode to start watching — no sign-up needed.`,
+      q: `Is ${baseTitle} available in Hindi dubbed?`,
+      a: `Yes! ${baseTitle} is available in ${audio} on CKDub (www.ckdub.com). You can watch all ${epCount > 0 ? `${epCount} released` : ''} episodes with high-quality Hindi audio streaming and English subtitles for free.`,
     },
     {
-      q: `How many episodes does ${baseTitle} have?`,
+      q: `Where can I watch ${baseTitle} in Hindi dubbed online?`,
+      a: `You can watch ${baseTitle} ${audio} online directly on CKDub (www.ckdub.com). Open any episode from the episode list to stream with our built-in DoodStream video player or open direct TeraBox links. No subscription or registration is required.`,
+    },
+    {
+      q: `How can I download ${baseTitle} Hindi dubbed episodes in HD?`,
+      a: `To download ${baseTitle} Hindi dubbed episodes in 720p or 1080p HD, select any episode from the list above and click the TeraBox download button. All episodes are available for fast, direct download.`,
+    },
+    {
+      q: `How many episodes does ${baseTitle} have in Hindi?`,
       a: drama.total_episodes
-        ? `${baseTitle} has ${drama.total_episodes} episodes in total. ${epCount} ${epCount === 1 ? 'is' : 'are'} currently available in ${audio} on CKDub.`
-        : `${epCount} episode${epCount === 1 ? ' is' : 's are'} currently available in ${audio} on CKDub.`,
+        ? `${baseTitle} has ${drama.total_episodes} episodes in total. Currently, ${epCount} ${epCount === 1 ? 'episode is' : 'episodes are'} available to stream in ${audio} on CKDub.`
+        : `${epCount} episode${epCount === 1 ? ' is' : 's are'} currently available in ${audio} on CKDub, with new episodes added regularly.`,
     },
     {
       q: `Is ${baseTitle} completed or ongoing?`,
       a: drama.status === 'Completed'
-        ? `${baseTitle} is completed. All available episodes are listed on this page.`
-        : `${baseTitle} is ongoing. New ${audio} episodes are added on CKDub as they release${drama.episode_schedule_note ? ` — ${drama.episode_schedule_note}` : ''}.`,
+        ? `${baseTitle} is a completed series. All released episodes are ready to binge watch on CKDub.`
+        : `${baseTitle} is currently ongoing. New ${audio} episodes are added on CKDub as soon as they release${drama.episode_schedule_note ? ` (${drama.episode_schedule_note})` : ''}.`,
+    },
+    {
+      q: `Is CKDub free to watch ${baseTitle}?`,
+      a: `Yes, CKDub is 100% free. You can watch and download ${baseTitle} and hundreds of other Korean and Chinese dramas in Hindi dubbed without paying any fees or creating an account.`,
     },
     ...(lastUpdated
       ? [{ q: `When was the latest episode of ${baseTitle} added?`, a: `The latest episode (Episode ${latestEpisode.episode_number}) was added on ${new Date(lastUpdated).toDateString().slice(4)}.` }]

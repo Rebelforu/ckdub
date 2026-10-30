@@ -31,9 +31,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const baseTitle = drama.title.replace(/\s*(hindi|english)\s*dubbed\s*$/i, '').trim();
   const url = `${SITE_URL}/drama/${params.slug}/watch/${episodeNumber}`;
 
-  const seoTitle = `${baseTitle} Episode ${episodeNumber} ${audio} | CKDub`;
+  const seoTitle = `${baseTitle} Episode ${episodeNumber} Hindi Dubbed - Watch Online & Download HD`;
   const seoDescription = stripText(
-    `Watch ${baseTitle} Episode ${episodeNumber} ${audio} online free on CKDub. ${drama.short_description || drama.meta_description || drama.description || ''}`,
+    `Watch and download ${baseTitle} Episode ${episodeNumber} in Hindi dubbed online free in HD. Stream in 720p/1080p with Hindi audio on DoodStream and TeraBox on CKDub.`,
     160
   );
 
@@ -41,14 +41,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: seoTitle,
     description: seoDescription,
     keywords: [
-      `${baseTitle} episode ${episodeNumber} ${audio}`,
+      `${baseTitle} episode ${episodeNumber} Hindi dubbed`,
       `${baseTitle} ep ${episodeNumber} in Hindi`,
+      `${baseTitle} episode ${episodeNumber} in Hindi`,
+      `${baseTitle} ep ${episodeNumber} Hindi dubbed`,
       `${baseTitle} episode ${episodeNumber} watch online`,
+      `${baseTitle} episode ${episodeNumber} download`,
+      `${baseTitle} ep ${episodeNumber} Hindi download`,
+      `${baseTitle} episode ${episodeNumber} ${audio}`,
       `${baseTitle} ${audio}`,
+      `${baseTitle} in Hindi`,
     ],
     alternates: { canonical: url },
     openGraph: {
-      title: seoTitle,
+      title: `${baseTitle} Episode ${episodeNumber} Hindi Dubbed | CKDub`,
       description: seoDescription,
       url,
       type: 'video.episode',
