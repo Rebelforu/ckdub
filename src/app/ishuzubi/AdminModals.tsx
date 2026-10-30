@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -256,31 +256,59 @@ export default function AdminModals({ dramas }: { dramas: any[] }) {
                 <input name="episode_number" required type="number" min="1" placeholder="e.g. 1" className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white" />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-textMuted mb-2 uppercase tracking-wider">TeraBox URL (Server 1)</label>
-                <input name="terabox_url" required type="url" placeholder="https://terabox.com/s/..." className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white" />
+              {/* Server 1 — TeraBox (or any external link) */}
+              <div className="bg-[#18191E] p-4 rounded-xl border border-orange-500/20 space-y-3">
+                <h3 className="text-xs font-bold text-orange-400 uppercase tracking-widest flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                  Server 1 — External Link (TeraBox etc.)
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">Button Name</label>
+                    <input name="server_1_name" type="text" defaultValue="TeraBox" placeholder="TeraBox" className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-orange-500/50 outline-none text-white transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">URL <span className="text-primary">*</span></label>
+                    <input name="terabox_url" required type="url" placeholder="https://terabox.com/s/..." className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-orange-500/50 outline-none text-white transition-colors" />
+                  </div>
+                </div>
               </div>
 
-              {/* Optional Secondary Providers & Notes - Different Styling */}
-              <div className="bg-[#18191E] p-4 rounded-xl border border-white/5 space-y-4">
-                <h3 className="text-xs font-bold text-[#A3A5AD] uppercase tracking-widest flex items-center gap-2">
-                  <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  Optional Configurations
+              {/* Server 2 — DoodStream embed */}
+              <div className="bg-[#18191E] p-4 rounded-xl border border-blue-500/20 space-y-3">
+                <h3 className="text-xs font-bold text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+                  Server 2 — DoodStream (embeds inline)
                 </h3>
-                
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">Server 2 URL</label>
-                    <input name="server_2_url" type="url" placeholder="Alternative link..." className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-blue-500/50 outline-none text-white transition-colors" />
+                    <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">Button Name</label>
+                    <input name="server_2_name" type="text" defaultValue="DoodStream" placeholder="DoodStream" className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-blue-500/50 outline-none text-white transition-colors" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">DoodStream URL</label>
+                    <input name="server_2_url" type="url" placeholder="https://dood.to/e/..." className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-blue-500/50 outline-none text-white transition-colors" />
+                  </div>
+                </div>
+                <p className="text-[10px] text-blue-400/60">Paste the embed URL e.g. https://dood.to/e/FILECODE — it will stream directly on the site.</p>
+              </div>
+
+              {/* Server 3 + Episode Note */}
+              <div className="bg-[#18191E] p-4 rounded-xl border border-white/5 space-y-3">
+                <h3 className="text-xs font-bold text-[#A3A5AD] uppercase tracking-widest">Extra Server &amp; Notes</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">Server 3 Button Name</label>
+                    <input name="server_3_name" type="text" defaultValue="Server 3" placeholder="Server 3" className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-white/30 outline-none text-white transition-colors" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">Server 3 URL</label>
-                    <input name="server_3_url" type="url" placeholder="Backup link..." className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-blue-500/50 outline-none text-white transition-colors" />
+                    <input name="server_3_url" type="url" placeholder="Backup link..." className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-white/30 outline-none text-white transition-colors" />
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">Note Below Episode</label>
-                    <input name="episode_note" type="text" placeholder="e.g. Subtitles out of sync, fixing soon..." className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-purple-500/50 outline-none text-white transition-colors" />
-                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-semibold text-textMuted mb-1 uppercase">Episode Note (shown to viewers)</label>
+                  <input name="episode_note" type="text" placeholder="e.g. Subtitles out of sync, fixing soon..." className="w-full bg-[#0D0E10] border border-white/10 rounded-md px-3 py-2 text-sm focus:border-purple-500/50 outline-none text-white transition-colors" />
                 </div>
               </div>
 

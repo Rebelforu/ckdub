@@ -99,18 +99,24 @@ export async function addEpisode(formData: FormData) {
   const drama_id = formData.get("drama_id") as string;
   const episode_number = parseInt(formData.get("episode_number") as string);
   const terabox_url = formData.get("terabox_url") as string;
+  const server_1_name = formData.get("server_1_name") as string;
   const server_2_url = formData.get("server_2_url") as string;
+  const server_2_name = formData.get("server_2_name") as string;
   const server_3_url = formData.get("server_3_url") as string;
+  const server_3_name = formData.get("server_3_name") as string;
   const episode_note = formData.get("episode_note") as string;
 
   const { error } = await supabase
     .from("episodes")
-    .insert([{ 
-      drama_id, 
-      episode_number, 
+    .insert([{
+      drama_id,
+      episode_number,
       terabox_url,
+      server_1_name: server_1_name || null,
       server_2_url: server_2_url || null,
+      server_2_name: server_2_name || null,
       server_3_url: server_3_url || null,
+      server_3_name: server_3_name || null,
       episode_note: episode_note || null
     }]);
 
@@ -133,17 +139,23 @@ export async function updateEpisode(formData: FormData) {
   const id = formData.get("id") as string;
   const episode_number = parseInt(formData.get("episode_number") as string);
   const terabox_url = formData.get("terabox_url") as string;
+  const server_1_name = formData.get("server_1_name") as string;
   const server_2_url = formData.get("server_2_url") as string;
+  const server_2_name = formData.get("server_2_name") as string;
   const server_3_url = formData.get("server_3_url") as string;
+  const server_3_name = formData.get("server_3_name") as string;
   const episode_note = formData.get("episode_note") as string;
 
   const { error } = await supabase
     .from("episodes")
-    .update({ 
-      episode_number, 
+    .update({
+      episode_number,
       terabox_url,
+      server_1_name: server_1_name || null,
       server_2_url: server_2_url || null,
+      server_2_name: server_2_name || null,
       server_3_url: server_3_url || null,
+      server_3_name: server_3_name || null,
       episode_note: episode_note || null
     })
     .eq("id", id);

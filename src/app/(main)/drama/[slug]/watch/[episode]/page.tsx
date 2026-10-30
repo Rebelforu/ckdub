@@ -1,8 +1,9 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { getServiceSupabase } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import VideoPlayer from '@/components/VideoPlayer';
+import { SITE_URL, audioLabel, categoryLabel, stripText } from '@/lib/site';
 
 export const revalidate = 3600;
 
@@ -17,37 +18,60 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = getServiceSupabase();
   const { data: drama } = await supabase
     .from('dramas')
-    .select('title, short_description, meta_description, description')
+    .select('title, short_description, meta_description, description, language, category, release_year, poster_url, backdrop_url')
     .eq('slug', params.slug)
     .single();
 
   if (!drama) {
-    return {
-      title: 'Episode Not Found | CKDub',
-    };
+    return { title: 'Episode Not Found | CKDub', robots: { index: false } };
   }
 
   const episodeNumber = parseInt(params.episode, 10);
-  const hindiDubbedText = "Hindi Dubbed";
+  const audio = audioLabel(drama.language);
+  const baseTitle = drama.title.replace(/\s*(hindi|english)\s*dubbed\s*$/i, '').trim();
+  const url = `${SITE_URL}/drama/${params.slug}/watch/${episodeNumber}`;
 
-  const seoTitle = `${drama.title} Episode ${episodeNumber} ${hindiDubbedText}`;
-  const seoDescription = `Watch ${drama.title} Episode ${episodeNumber} ${hindiDubbedText} online. ${drama.short_description || drama.meta_description || drama.description || ''}`.substring(0, 160);
+  const seoTitle = `${baseTitle} Episode ${episodeNumber} ${audio} | CKDub`;
+  const seoDescription = stripText(
+    `Watch ${baseTitle} Episode ${episodeNumber} ${audio} online free on CKDub. ${drama.short_description || drama.meta_description || drama.description || ''}`,
+    160
+  );
 
   return {
     title: seoTitle,
     description: seoDescription,
+    keywords: [
+      `${baseTitle} episode ${episodeNumber} ${audio}`,
+      `${baseTitle} ep ${episodeNumber} in Hindi`,
+      `${baseTitle} episode ${episodeNumber} watch online`,
+      `${baseTitle} ${audio}`,
+    ],
+    alternates: { canonical: url },
+    openGraph: {
+      title: seoTitle,
+      description: seoDescription,
+      url,
+      type: 'video.episode',
+      images: drama.backdrop_url || drama.poster_url
+        ? [{ url: drama.backdrop_url || drama.poster_url!, width: 1280, height: 720, alt: seoTitle }]
+        : [],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
   };
 }
 
 export default async function WatchPage({ params }: Props) {
   const episodeNumber = parseInt(params.episode, 10);
-  
+
   if (isNaN(episodeNumber)) {
     notFound();
   }
 
   const supabase = getServiceSupabase();
-  
+
   // Fetch drama and its episodes
   const { data: drama } = await supabase
     .from('dramas')
@@ -63,24 +87,63 @@ export default async function WatchPage({ params }: Props) {
   }
 
   const currentEpisode = drama.episodes?.find((ep: any) => ep.episode_number === episodeNumber);
-  
+
   if (!currentEpisode) {
     notFound();
   }
 
   const allEpisodes = drama.episodes?.sort((a: any, b: any) => a.episode_number - b.episode_number) || [];
   const currentEpIndex = allEpisodes.findIndex((ep: any) => ep.episode_number === episodeNumber);
-  
+
   const prevEpisode = currentEpIndex > 0 ? allEpisodes[currentEpIndex - 1] : null;
   const nextEpisode = currentEpIndex < allEpisodes.length - 1 ? allEpisodes[currentEpIndex + 1] : null;
 
+  const audio = audioLabel(drama.language);
+  const baseTitle = drama.title.replace(/\s*(hindi|english)\s*dubbed\s*$/i, '').trim();
+  const url = `${SITE_URL}/drama/${params.slug}/watch/${episodeNumber}`;
+  const dramaUrl = `${SITE_URL}/drama/${params.slug}`;
+
+  // TVEpisode structured data for Google
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'TVEpisode',
+        '@id': url,
+        name: `${baseTitle} Episode ${episodeNumber} ${audio}`,
+        episodeNumber,
+        url,
+        inLanguage: drama.language?.toLowerCase().includes('hindi') ? 'hi' : 'en',
+        partOfTVSeries: {
+          '@type': 'TVSeries',
+          name: drama.title,
+          url: dramaUrl,
+          image: drama.backdrop_url || drama.poster_url || undefined,
+        },
+        description: drama.short_description || drama.description || undefined,
+        thumbnailUrl: drama.backdrop_url || drama.poster_url || undefined,
+        datePublished: currentEpisode.created_at,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: drama.title, item: dramaUrl },
+          { '@type': 'ListItem', position: 3, name: `Episode ${episodeNumber}`, item: url },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-[#0D0E10] text-[#F5F5F3]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+
       {/* Top navigation bar */}
       <div className="w-full bg-[#141519] border-b border-[#1C1D22] p-4 sticky top-0 z-50">
         <div className="container mx-auto max-w-7xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link 
+            <Link
               href={`/drama/${params.slug}`}
               className="text-[#92949A] hover:text-[#E50914] transition-colors flex items-center gap-2"
             >
@@ -93,8 +156,8 @@ export default async function WatchPage({ params }: Props) {
               {drama.title} <span className="text-[#92949A] font-normal">— Episode {episodeNumber}</span>
             </h1>
           </div>
-          
-          <div className="text-sm text-[#92949A] flex items-center gap-2 hidden sm:flex">
+
+          <div className="text-sm text-[#92949A] items-center gap-2 hidden sm:flex">
             <Link href="/" className="hover:text-[#F5F5F3]">Home</Link>
             <span>/</span>
             <Link href={`/drama/${params.slug}`} className="hover:text-[#F5F5F3] truncate max-w-[150px]">{drama.title}</Link>
@@ -107,17 +170,17 @@ export default async function WatchPage({ params }: Props) {
       {/* Main Content Area */}
       <div className="container mx-auto max-w-7xl p-4 mt-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* LEFT: Video Player and Info */}
           <div className="lg:col-span-12 flex flex-col gap-6">
-            
+
             {/* Video Player & Server Selection */}
             <VideoPlayer episode={currentEpisode} drama={drama} />
 
             {/* Episode Navigation */}
             <div className="flex items-center justify-between bg-[#141519] p-4 rounded-xl border border-[#1C1D22]">
               {prevEpisode ? (
-                <Link 
+                <Link
                   href={`/drama/${params.slug}/watch/${prevEpisode.episode_number}`}
                   className="flex items-center gap-2 px-4 py-2 bg-[#1C1D22] hover:bg-[#E50914] text-white rounded-lg transition-colors font-medium"
                 >
@@ -140,7 +203,7 @@ export default async function WatchPage({ params }: Props) {
               </div>
 
               {nextEpisode ? (
-                <Link 
+                <Link
                   href={`/drama/${params.slug}/watch/${nextEpisode.episode_number}`}
                   className="flex items-center gap-2 px-4 py-2 bg-[#1C1D22] hover:bg-[#E50914] text-white rounded-lg transition-colors font-medium"
                 >
@@ -173,11 +236,12 @@ export default async function WatchPage({ params }: Props) {
                   </div>
                 </div>
               )}
-              
+
               <div className="flex-1 flex flex-col gap-4">
                 <div>
                   <h2 className="text-2xl font-bold mb-2">{drama.title}</h2>
-                  
+                  <p className="text-[#92949A] text-sm mb-3">Season 1 &bull; Episode {episodeNumber} &bull; {audio}</p>
+
                   <div className="flex flex-wrap gap-2 mb-4">
                     {drama.language && (
                       <span className="px-2.5 py-1 text-xs font-semibold bg-[#1C1D22] text-[#F5F5F3] rounded-md border border-[#2A2B32]">
@@ -186,21 +250,24 @@ export default async function WatchPage({ params }: Props) {
                     )}
                     {drama.category && (
                       <span className="px-2.5 py-1 text-xs font-semibold bg-[#1C1D22] text-[#F5F5F3] rounded-md border border-[#2A2B32]">
-                        {drama.category}
+                        {categoryLabel(drama.category)}
+                      </span>
+                    )}
+                    {drama.status && (
+                      <span className={`px-2.5 py-1 text-xs font-semibold rounded-md border ${drama.status === 'Ongoing' ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-green-500/10 border-green-500/20 text-green-400'}`}>
+                        {drama.status}
                       </span>
                     )}
                   </div>
-                  
+
                   <p className="text-[#92949A] text-sm leading-relaxed max-w-3xl">
                     {drama.description || 'No description available for this drama.'}
                   </p>
                 </div>
               </div>
             </div>
-            
-          </div>
 
-          
+          </div>
 
         </div>
 
@@ -208,5 +275,3 @@ export default async function WatchPage({ params }: Props) {
     </div>
   );
 }
-
-

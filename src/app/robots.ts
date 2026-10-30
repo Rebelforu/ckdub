@@ -1,7 +1,8 @@
 import { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
-const PRIVATE = ["/ishuzubi", "/api/"];
+// Only block internal API routes — do NOT list admin path so no one learns it from robots.txt
+const PRIVATE = ["/api/"];
 
 // AI / answer-engine crawlers we explicitly WANT (GEO / AEO visibility in ChatGPT, Perplexity, Gemini, Claude, Copilot)
 const AI_BOTS = [
