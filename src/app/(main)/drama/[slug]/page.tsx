@@ -355,9 +355,8 @@ export default async function DramaDetail({ params }: { params: { slug: string }
             {episodes.map((ep: any) => (
               <ClientEpisodeButton
                 key={ep.id || ep.episode_number}
-                episodeNumber={ep.episode_number}
+                episode={ep}
                 dramaSlug={params.slug}
-                videoUrl={ep.terabox_url}
                 category={drama.category}
               />
             ))}

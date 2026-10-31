@@ -12,6 +12,9 @@ interface Props {
     slug: string;
     episode: string;
   };
+  searchParams?: {
+    server?: string;
+  };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -69,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function WatchPage({ params }: Props) {
+export default async function WatchPage({ params, searchParams }: Props) {
   const episodeNumber = parseInt(params.episode, 10);
 
   if (isNaN(episodeNumber)) {
@@ -181,7 +184,11 @@ export default async function WatchPage({ params }: Props) {
           <div className="lg:col-span-12 flex flex-col gap-6">
 
             {/* Video Player & Server Selection */}
-            <VideoPlayer episode={currentEpisode} drama={drama} />
+            <VideoPlayer
+              episode={currentEpisode}
+              drama={drama}
+              initialServerId={searchParams?.server ? parseInt(searchParams.server, 10) : undefined}
+            />
 
             {/* Episode Navigation */}
             <div className="flex items-center justify-between bg-[#141519] p-4 rounded-xl border border-[#1C1D22]">
