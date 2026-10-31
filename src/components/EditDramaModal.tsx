@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -67,23 +67,42 @@ export default function EditDramaModal({ drama }: { drama: any }) {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-textMuted mb-2">Category</label>
-                    <select name="category" defaultValue={drama.category} required className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white">
-                      <option value="Korean Series">Korean Series</option>
-                      <option value="Chinese Series">Chinese Series</option>
-                      <option value="Japanese Series">Japanese Series</option>
-                      <option value="Thai Series">Thai Series</option>
-                        <option value="AI Original">AI Original</option>
+                    <select
+                      name="category"
+                      defaultValue={
+                        drama.category === "Korean Series"
+                          ? "korean"
+                          : drama.category === "Chinese Series"
+                          ? "chinese"
+                          : drama.category === "AI Original"
+                          ? "ai_series"
+                          : drama.category
+                      }
+                      required
+                      className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white"
+                    >
+                      <option value="korean">Korean Series</option>
+                      <option value="chinese">Chinese Series</option>
+                      <option value="ai_series">AI Original</option>
+                      <option value="english">English Series</option>
+                      <option value="japanese">Japanese Series</option>
+                      <option value="thai">Thai Series</option>
                     </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-textMuted mb-2">Language</label>
-                      <select name="language" defaultValue={drama.language || "Hindi Dub"} className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white">
-                        <option value="Hindi Dub">Hindi Dub</option>
-                        <option value="English Dub">English Dub</option>
-                        <option value="Multi Audio">Multi Audio</option>
-                        <option value="Eng Sub (Original Audio)">Eng Sub (Original Audio)</option>`n                        <option value="Hindi Sub">Hindi Sub</option>
-                      </select>
-                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-textMuted mb-2">Language</label>
+                    <select
+                      name="language"
+                      defaultValue={drama.language || "Hindi Dub"}
+                      className="w-full bg-[#0a0a0a] border border-white/5 rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none text-white"
+                    >
+                      <option value="Hindi Dub">Hindi Dub</option>
+                      <option value="English Dub">English Dub</option>
+                      <option value="Multi Audio">Multi Audio</option>
+                      <option value="Eng Sub (Original Audio)">Eng Sub (Original Audio)</option>
+                      <option value="Hindi Sub">Hindi Sub</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

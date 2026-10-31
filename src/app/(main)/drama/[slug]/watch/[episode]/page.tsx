@@ -141,6 +141,27 @@ export default async function WatchPage({ params, searchParams }: Props) {
           { '@type': 'ListItem', position: 3, name: `Episode ${episodeNumber}`, item: url },
         ],
       },
+      {
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `How to watch ${baseTitle} Episode ${episodeNumber} in Hindi dubbed online?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `You can stream ${baseTitle} Episode ${episodeNumber} in Hindi dubbed directly on CKDub using the available stream servers with HD quality.`,
+            },
+          },
+          {
+            '@type': 'Question',
+            name: `Can I download ${baseTitle} Episode ${episodeNumber} in Hindi?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Yes, fast download links via TeraBox and cloud storage are provided on CKDub for offline viewing.`,
+            },
+          },
+        ],
+      },
     ],
   };
 
@@ -276,6 +297,68 @@ export default async function WatchPage({ params, searchParams }: Props) {
                   <p className="text-[#92949A] text-sm leading-relaxed max-w-3xl">
                     {drama.description || 'No description available for this drama.'}
                   </p>
+                </div>
+              </div>
+            </div>
+
+            {/* All Episodes Grid - Crucial for user navigation & Googlebot internal crawl discovery */}
+            <div className="bg-[#141519] p-6 rounded-2xl border border-[#1C1D22]">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#1C1D22]">
+                <div>
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span>All Episodes</span>
+                    <span className="text-xs font-normal text-[#92949A]">({allEpisodes.length} total)</span>
+                  </h3>
+                  <p className="text-xs text-[#92949A] mt-0.5">Select an episode to watch or download in Hindi dubbed</p>
+                </div>
+                <Link
+                  href={`/drama/${params.slug}`}
+                  className="text-xs text-primary hover:underline font-semibold flex items-center gap-1"
+                >
+                  View Series Page ↗
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5">
+                {allEpisodes.map((ep: any) => {
+                  const isCurrent = ep.episode_number === episodeNumber;
+                  return (
+                    <Link
+                      key={ep.id || ep.episode_number}
+                      href={`/drama/${params.slug}/watch/${ep.episode_number}`}
+                      className={`px-3 py-3 rounded-xl text-center transition-all flex flex-col items-center justify-center border font-bold text-sm ${
+                        isCurrent
+                          ? "bg-primary border-primary text-white shadow-[0_0_15px_rgba(229,9,20,0.4)] ring-2 ring-primary/40"
+                          : "bg-[#1C1D22] border-white/5 text-[#A3A5AD] hover:bg-[#25272F] hover:text-white hover:border-white/20"
+                      }`}
+                    >
+                      <span className="text-[10px] font-medium opacity-70 uppercase tracking-wider">
+                        {drama.category === "ai_series" ? "Part" : "Ep"}
+                      </span>
+                      <span className="text-base">{ep.episode_number}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* SEO FAQ & Quick Guide */}
+            <div className="bg-[#141519] p-6 rounded-2xl border border-[#1C1D22]">
+              <h3 className="text-base font-bold text-white mb-4">
+                Frequently Asked Questions — {baseTitle} Episode {episodeNumber}
+              </h3>
+              <div className="space-y-4 text-sm text-[#92949A]">
+                <div>
+                  <h4 className="text-white font-semibold mb-1">How can I watch {baseTitle} Episode {episodeNumber} in Hindi dubbed?</h4>
+                  <p>Choose an available streaming server above to watch Episode {episodeNumber} in HD online with Hindi audio. No registration required.</p>
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold mb-1">Can I download {baseTitle} Episode {episodeNumber}?</h4>
+                  <p>Yes, click on the download server option above to open the direct download link and save the episode for offline viewing.</p>
+                </div>
+                <div>
+                  <h4 className="text-white font-semibold mb-1">Where are the other episodes?</h4>
+                  <p>All episodes are listed above in the episode grid, or you can visit the main <Link href={`/drama/${params.slug}`} className="text-primary hover:underline">{drama.title} page</Link> for the full season list and cast synopsis.</p>
                 </div>
               </div>
             </div>

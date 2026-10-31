@@ -25,6 +25,18 @@ async function touchDrama(supabase: any, dramaId: string, episodeNumber?: number
   return drama?.slug as string | undefined;
 }
 
+function normalizeCategory(cat?: string | null): string {
+  if (!cat) return "korean";
+  const c = cat.trim().toLowerCase();
+  if (c.includes("chinese")) return "chinese";
+  if (c.includes("korean")) return "korean";
+  if (c.includes("ai") || c.includes("original")) return "ai_series";
+  if (c.includes("english")) return "english";
+  if (c.includes("japan")) return "japanese";
+  if (c.includes("thai")) return "thai";
+  return c.replace(/\s+/g, "-");
+}
+
 export async function createDrama(formData: FormData) {
   const supabase = createClient();
   
@@ -36,7 +48,8 @@ export async function createDrama(formData: FormData) {
 
   const title = formData.get("title") as string;
   const slug = formData.get("slug") as string;
-  const category = formData.get("category") as string;
+  const rawCategory = formData.get("category") as string;
+  const category = normalizeCategory(rawCategory);
   const status = formData.get("status") as string;
   const language = formData.get("language") as string;
   const description = formData.get("description") as string;
@@ -111,23 +124,49 @@ export async function addEpisode(formData: FormData) {
   const server_3_name = formData.get("server_3_name") as string;
   const episode_note = formData.get("episode_note") as string;
 
-  const { error } = await supabase
+  // Check if this episode number already exists for this drama to prevent duplicate rows
+  const { data: existing } = await supabase
     .from("episodes")
-    .insert([{
-      drama_id,
-      episode_number,
-      terabox_url,
-      server_1_name: server_1_name || null,
-      server_2_url: server_2_url || null,
-      server_2_name: server_2_name || null,
-      server_3_url: server_3_url || null,
-      server_3_name: server_3_name || null,
-      episode_note: episode_note || null
-    }]);
+    .select("id")
+    .eq("drama_id", drama_id)
+    .eq("episode_number", episode_number)
+    .maybeSingle();
 
-  if (error) {
-    console.error("Error adding episode:", error);
-    throw new Error("Failed to add episode");
+  let saveError;
+  if (existing?.id) {
+    const { error } = await supabase
+      .from("episodes")
+      .update({
+        terabox_url,
+        server_1_name: server_1_name || null,
+        server_2_url: server_2_url || null,
+        server_2_name: server_2_name || null,
+        server_3_url: server_3_url || null,
+        server_3_name: server_3_name || null,
+        episode_note: episode_note || null,
+      })
+      .eq("id", existing.id);
+    saveError = error;
+  } else {
+    const { error } = await supabase
+      .from("episodes")
+      .insert([{
+        drama_id,
+        episode_number,
+        terabox_url,
+        server_1_name: server_1_name || null,
+        server_2_url: server_2_url || null,
+        server_2_name: server_2_name || null,
+        server_3_url: server_3_url || null,
+        server_3_name: server_3_name || null,
+        episode_note: episode_note || null,
+      }]);
+    saveError = error;
+  }
+
+  if (saveError) {
+    console.error("Error adding episode:", saveError);
+    throw new Error("Failed to add episode: " + saveError.message);
   }
 
   const slug = await touchDrama(supabase, drama_id, episode_number);
@@ -254,7 +293,8 @@ export async function updateDrama(formData: FormData) {
   const id = formData.get("id") as string;
   const title = formData.get("title") as string;
   const slug = formData.get("slug") as string;
-  const category = formData.get("category") as string;
+  const rawCategory = formData.get("category") as string;
+  const category = normalizeCategory(rawCategory);
   const status = formData.get("status") as string;
   const language = formData.get("language") as string;
   const description = formData.get("description") as string;

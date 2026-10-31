@@ -22,17 +22,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  const episodeEntries: MetadataRoute.Sitemap = list.flatMap((drama: any) =>
-    (drama.episodes || []).map((ep: any) => ({
-      url: `${SITE_URL}/drama/${drama.slug}/watch/${ep.episode_number}`,
-      lastModified: new Date(ep.created_at),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    }))
+  // Episode entries: deduplicate per drama to prevent Googlebot seeing duplicate URLs
+  const episodeEntries: MetadataRoute.Sitemap = list.flatMap((drama: any) => {
+    const seen = new Set<number>();
+    return (drama.episodes || [])
+      .filter((ep: any) => {
+        if (!ep.episode_number || seen.has(ep.episode_number)) return false;
+        seen.add(ep.episode_number);
+        return true;
+      })
+      .map((ep: any) => ({
+        url: `${SITE_URL}/drama/${drama.slug}/watch/${ep.episode_number}`,
+        lastModified: new Date(ep.created_at || drama.updated_at || drama.created_at),
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      }));
+  });
+
+  // Category normalization: strictly canonical URL slugs, never unencoded spaces
+  const normalizeCatSlug = (cat: string) => {
+    const c = cat.toLowerCase().trim();
+    if (c.includes("chinese")) return "chinese";
+    if (c.includes("korean")) return "korean";
+    if (c.includes("ai") || c.includes("original")) return "ai_series";
+    return c.replace(/\s+/g, "-");
+  };
+
+  const rawCategories = Array.from(new Set(list.map((d: any) => d.category).filter(Boolean))) as string[];
+  const canonicalCategories = Array.from(
+    new Set(["korean", "chinese", ...rawCategories.map(normalizeCatSlug)])
   );
 
-  const categories = Array.from(new Set(list.map((d: any) => d.category).filter(Boolean))) as string[];
-  const categoryEntries: MetadataRoute.Sitemap = categories.map((c) => ({
+  const categoryEntries: MetadataRoute.Sitemap = canonicalCategories.map((c) => ({
     url: `${SITE_URL}/category/${c}`,
     lastModified: newest,
     changeFrequency: "daily",

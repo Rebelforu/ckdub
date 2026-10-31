@@ -144,11 +144,21 @@ export default async function CategoryPage({ params }: Props) {
   const config = CATEGORY_SEO[catKey];
   const categoryName = params.slug.charAt(0).toUpperCase() + params.slug.slice(1);
 
+  // Resilient category filters to capture all series in this genre
+  const categoryFilters =
+    catKey === 'chinese'
+      ? ['chinese', 'Chinese Series', 'Chinese']
+      : catKey === 'korean'
+      ? ['korean', 'Korean Series', 'Korean']
+      : catKey === 'ai_series'
+      ? ['ai_series', 'AI Original', 'ai-series']
+      : [params.slug];
+
   // Sorted by updated_at so newly updated series always appear first
   const { data: dramas } = await supabase
     .from('dramas')
     .select('*, episodes(id)')
-    .eq('category', params.slug)
+    .in('category', categoryFilters)
     .order('updated_at', { ascending: false });
 
   const dramaList = dramas || [];
